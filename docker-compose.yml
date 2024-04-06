@@ -20,7 +20,6 @@ services:
       - db
     ports:
       - ${APPLICATION_PORT_ON_DOCKER_HOST}:${APPLICATION_PORT_ON_CONTAINER}
-      - ${DEBUG_PORT_ON_DOCKER_HOST}:${DEBUG_PORT_ON_CONTAINER}
     volumes:
       - ./backend/:/app
     command: ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:${DEBUG_PORT_ON_CONTAINER}"
@@ -28,7 +27,7 @@ services:
     platform: linux/amd64
     build: ./websocket-service
     ports:
-      - "8083:8081"
+      - "8081:8081"
     volumes:
       - ./websocket-service/:/app
   db:
