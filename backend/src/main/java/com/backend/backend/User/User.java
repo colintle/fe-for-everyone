@@ -1,10 +1,18 @@
 package com.backend.backend.User;
 
+import java.util.Optional;
+
+import com.backend.backend.Room.Room;
+
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "users")
 public class User {
+
+    public enum Role {
+        USER, ADMIN
+    }
     
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -18,6 +26,14 @@ public class User {
 
     @Column(name = "password", nullable = false)
     private String password;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = true)
+    private Role role;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "roomID", nullable = true)
+    private Room room;
 
     //getters and setters
 
@@ -51,6 +67,22 @@ public class User {
 
     public void setPassword(String password){
         this.password = password;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public Room getRoom() {
+        return room;
+    }
+
+    public void setRoom(Room room) {
+        this.room = room;
     }
 }
 
