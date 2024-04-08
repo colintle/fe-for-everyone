@@ -5,6 +5,8 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import io.micrometer.common.util.StringUtils;
+
 public class UserService {
     @Autowired
     UserRepository userRepository;
@@ -26,15 +28,25 @@ public class UserService {
     }
 
     public String addUser(User request){
-        BCryptPasswordEncoder bycrypt = new BCryptPasswordEncoder();
-        String encrypted = bycrypt.encode(request.getPassword());
-        
+        if (request.getName().isEmpty() || 
+            request.getEmail().isEmpty() || 
+            request.getPassword().isEmpty()) {
+            return "Name, email, and password must not be empty.";
+        }
+
+        if (userRepository.findUserByEmail(request.getEmail()).isPresent()) {
+            return "User with email " + request.getEmail() + " already exists.";
+        }
+
+        BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder();
+        String encrypted = bcrypt.encode(request.getPassword());
+
         User user = new User();
         user.setName(request.getName());
         user.setEmail(request.getEmail());
         user.setPassword(encrypted);
 
         User savedUser = userRepository.save(user);
-        return savedUser.getName() + "added to database successfully";
+        return savedUser.getName() + " added to database successfully";
     }
 }
