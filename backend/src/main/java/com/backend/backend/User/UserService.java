@@ -25,9 +25,13 @@ public class UserService {
         throw new UserNotFoundException("Username or password is incorrect");
     }
 
-    public String addUser(User user){
+    public String addUser(User request){
         BCryptPasswordEncoder bycrypt = new BCryptPasswordEncoder();
-        String encrypted = bycrypt.encode(user.getPassword());
+        String encrypted = bycrypt.encode(request.getPassword());
+        
+        User user = new User();
+        user.setName(request.getName());
+        user.setEmail(request.getEmail());
         user.setPassword(encrypted);
 
         User savedUser = userRepository.save(user);
