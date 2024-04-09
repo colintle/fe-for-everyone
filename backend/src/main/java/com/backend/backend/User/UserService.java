@@ -2,54 +2,67 @@ package com.backend.backend.User;
 
 import java.util.Optional;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import com.backend.backend.JWT.JWT;
+import com.backend.backend.JWT.JWTService;
 
 @Service
 public class UserService {
     
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JWTService jwtService;
+    private final AuthenticationManager authenticationManager;
 
-    public UserService(UserRepository userRepository){
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JWTService jwtService, AuthenticationManager authenticationManager){
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
+        this.authenticationManager = authenticationManager;
     }
 
-    public String authenicateUser(User user) throws UserNotFoundException{
-        BCryptPasswordEncoder bycrypt = new BCryptPasswordEncoder();
-        Optional<User> opUser = userRepository.findUserByEmail(user.getEmail());
+    public JWT authenticate(User request) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getUsername(),
+                        request.getPassword()
+                )
+        );
 
-        if (opUser.isPresent()){
-            User dbUser = opUser.get();
-            if (bycrypt.matches(user.getPassword(), dbUser.getPassword())){
-                return "Authenicated!";
-            }
-            else{
-                throw new UserNotFoundException("Username or password is incorrect");
-            }
-        }
-        throw new UserNotFoundException("Username or password is incorrect");
+        User user = userRepository.findUserByEmail(request.getUsername()).orElseThrow();
+        String token = jwtService.generateToken(user);
+
+        return new JWT(token);
     }
 
-    public String addUser(User request){
-        if (request.getName().isEmpty() || 
-            request.getEmail().isEmpty() || 
-            request.getPassword().isEmpty()) {
-            return "Name, email, and password must not be empty.";
+    public JWT register(User request) {
+        if (request.getName().isEmpty() || request.getUsername().isEmpty() || request.getPassword().isEmpty()) {
+            throw new IllegalArgumentException("Name, username, and password must not be empty.");
         }
 
-        if (userRepository.findUserByEmail(request.getEmail()).isPresent()) {
-            return "User with email " + request.getEmail() + " already exists.";
+        Optional<User> existingUser = userRepository.findUserByEmail(request.getUsername());
+        if (existingUser.isPresent()) {
+            throw new BadCredentialsException("A user with the given username already exists.");
         }
-
-        BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder();
-        String encrypted = bcrypt.encode(request.getPassword());
 
         User user = new User();
         user.setName(request.getName());
-        user.setEmail(request.getEmail());
-        user.setPassword(encrypted);
+        user.setUsername(request.getUsername());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        User savedUser = userRepository.save(user);
-        return savedUser.getName() + " added to database successfully";
+        try {
+            user = userRepository.save(user);
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalStateException("User cannot be registered. Possible duplicate username.", e);
+        }
+
+        String token = jwtService.generateToken(user);
+        return new JWT(token);
     }
 }

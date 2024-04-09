@@ -5,6 +5,7 @@ import java.util.function.Function;
 
 import javax.crypto.SecretKey;
 
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import com.backend.backend.User.User;
@@ -18,13 +19,13 @@ import io.jsonwebtoken.security.Keys;
 public class JWTService {
     private String secretKey = System.getenv("SECRET_KEY");
 
-    public String extractEmail(String token) {
+    public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
-    public boolean isValid(String token, User user) {
-        String email = extractEmail(token);
-        return (email.equals(user.getEmail())) && !isTokenExpired(token);
+    public boolean isValid(String token, UserDetails user) {
+        String email = extractUsername(token);
+        return (email.equals(user.getUsername())) && !isTokenExpired(token);
     }
 
     private boolean isTokenExpired(String token) {
@@ -56,11 +57,11 @@ public class JWTService {
 
     public String generateToken(User user) {
         return Jwts.builder()
-                .setSubject(user.getEmail())
+                .setSubject(user.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 24*60*60*1000))
                 .signWith(getSigninKey())
-                .claim("email", user.getEmail())
+                .claim("username", user.getUsername())
                 .claim("name", user.getName())
                 .compact();
     }
