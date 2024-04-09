@@ -1,6 +1,10 @@
 package com.backend.backend.User;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import com.backend.backend.Room.Room;
 
@@ -83,6 +87,13 @@ public class User {
 
     public void setRoom(Room room) {
         this.room = room;
+    }
+
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        if (this.role == null) {
+            return Collections.emptyList();
+        }
+        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + this.role.name()));
     }
 }
 

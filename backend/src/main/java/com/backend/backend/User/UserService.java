@@ -2,14 +2,17 @@ package com.backend.backend.User;
 
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
 
-import io.micrometer.common.util.StringUtils;
-
+@Service
 public class UserService {
-    @Autowired
-    UserRepository userRepository;
+    
+    private final UserRepository userRepository;
+
+    public UserService(UserRepository userRepository){
+        this.userRepository = userRepository;
+    }
 
     public String authenicateUser(User user) throws UserNotFoundException{
         BCryptPasswordEncoder bycrypt = new BCryptPasswordEncoder();
