@@ -6,7 +6,10 @@ import java.util.Optional;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 import com.backend.backend.Room.Room;
 
@@ -27,9 +30,12 @@ public class User implements UserDetails{
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "email", nullable = false, unique = true)
-    private String email;
+    @NotBlank(message = "Username cannot be empty")
+    @Email()
+    @Column(name = "username", nullable = false, unique = true)
+    private String username;
 
+    @NotBlank(message = "Password cannot be blank")
     @Column(name = "password", nullable = false)
     private String password;
 
@@ -61,11 +67,11 @@ public class User implements UserDetails{
 
     @Override
     public String getUsername(){
-        return email;
+        return username;
     }
 
-    public void setUsername(String email){
-        this.email = email;
+    public void setUsername(String username){
+        this.username = username;
     }
 
     @Override

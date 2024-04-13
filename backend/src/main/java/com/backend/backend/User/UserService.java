@@ -35,32 +35,33 @@ public class UserService {
                 )
         );
 
-        User user = userRepository.findUserByEmail(request.getUsername()).orElseThrow();
+        User user = userRepository.findUserByUsername(request.getUsername()).orElseThrow();
         String token = jwtService.generateToken(user);
 
         return new JWT(token);
     }
 
     public JWT register(User request) {
-        if (request.getName().isEmpty() || request.getUsername().isEmpty() || request.getPassword().isEmpty()) {
-            throw new IllegalArgumentException("Name, username, and password must not be empty.");
-        }
+        // if (request.getName().isEmpty() || request.getUsername().isEmpty() || request.getPassword().isEmpty()) {
+        //     throw new IllegalArgumentException("Name, username, and password must not be empty.");
+        // }
 
-        Optional<User> existingUser = userRepository.findUserByEmail(request.getUsername());
-        if (existingUser.isPresent()) {
-            throw new BadCredentialsException("A user with the given username already exists.");
-        }
+        // Optional<User> existingUser = userRepository.findUserByUsername(request.getUsername());
+        // if (existingUser.isPresent()) {
+        //     throw new BadCredentialsException("A user with the given username already exists.");
+        // }
 
         User user = new User();
         user.setName(request.getName());
         user.setUsername(request.getUsername());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-
-        try {
-            user = userRepository.save(user);
-        } catch (DataIntegrityViolationException e) {
-            throw new IllegalStateException("User cannot be registered. Possible duplicate username.", e);
-        }
+        
+        user = userRepository.save(user);
+        // try {
+        //     user = userRepository.save(user);
+        // } catch (DataIntegrityViolationException e) {
+        //     throw new IllegalStateException("User cannot be registered. Possible duplicate username.", e);
+        // }
 
         String token = jwtService.generateToken(user);
         return new JWT(token);
