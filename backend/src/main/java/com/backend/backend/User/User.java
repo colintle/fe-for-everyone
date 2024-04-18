@@ -31,7 +31,6 @@ public class User implements UserDetails{
     private String name;
 
     @NotBlank(message = "Username cannot be empty")
-    @Email()
     @Column(name = "username", nullable = false, unique = true)
     private String username;
 

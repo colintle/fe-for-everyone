@@ -1,7 +1,10 @@
 package com.backend.backend.JWT;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -9,10 +12,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 
-import com.backend.backend.User.User;
 import com.backend.backend.User.UserDetailsServiceImp;
-import com.backend.backend.User.UserRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import io.micrometer.common.lang.NonNull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -24,10 +27,13 @@ public class JWTFilter extends OncePerRequestFilter{
     
     private final JWTService jwtService;
     private final UserDetailsServiceImp userDetailsService;
+    private final ObjectMapper mapper;  // Ensure ObjectMapper is injected or created
 
-    public JWTFilter(JWTService jwtService, UserDetailsServiceImp userDetailsService){
+
+    public JWTFilter(JWTService jwtService, UserDetailsServiceImp userDetailsService, ObjectMapper mapper){
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
+        this.mapper = mapper;
     }
 
     @Override
@@ -41,21 +47,34 @@ public class JWTFilter extends OncePerRequestFilter{
             return;
         }
 
-        String token = authHeader.substring(7);
-        String username = jwtService.extractUsername(token);
+        try{
+            String token = authHeader.substring(7);
+            String username = jwtService.extractUsername(token);
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-            if (jwtService.isValid(token, userDetails)) {
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities()
-                );
+                if (jwtService.isValid(token, userDetails)) {
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities()
+                    );
 
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
             }
+            filterChain.doFilter(request, response); 
         }
-        filterChain.doFilter(request, response);
+
+        catch(ExpiredJwtException e){
+            Map<String, Object> errorDetails = new HashMap<>();
+            errorDetails.put("message", "The token has expired. Please log in again.");
+
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+
+            mapper.writeValue(response.getWriter(), errorDetails);
+            return;
+        }
+ 
     }
 }

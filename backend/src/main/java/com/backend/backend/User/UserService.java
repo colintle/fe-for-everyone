@@ -2,9 +2,7 @@ package com.backend.backend.User;
 
 import java.util.Optional;
 
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,20 +17,22 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JWTService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final PasswordConstraintValidator passwordConstraintValidator;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JWTService jwtService, AuthenticationManager authenticationManager){
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JWTService jwtService, AuthenticationManager authenticationManager, PasswordConstraintValidator passwordConstraintValidator){
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
+        this.passwordConstraintValidator = passwordConstraintValidator;
     }
 
     public JWT authenticate(User request) {
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getUsername(),
-                        request.getPassword()
-                )
+            new UsernamePasswordAuthenticationToken(
+                    request.getUsername(),
+                    request.getPassword()
+            )
         );
 
         User user = userRepository.findUserByUsername(request.getUsername()).orElseThrow();
@@ -42,14 +42,18 @@ public class UserService {
     }
 
     public JWT register(User request) {
-        // if (request.getName().isEmpty() || request.getUsername().isEmpty() || request.getPassword().isEmpty()) {
-        //     throw new IllegalArgumentException("Name, username, and password must not be empty.");
-        // }
+        if (request.getName().isEmpty() || request.getUsername().isEmpty() || request.getPassword().isEmpty()) {
+            throw new IllegalArgumentException("Username or password does not meet the requirements.");
+        }
 
-        // Optional<User> existingUser = userRepository.findUserByUsername(request.getUsername());
-        // if (existingUser.isPresent()) {
-        //     throw new BadCredentialsException("A user with the given username already exists.");
-        // }
+        Optional<User> existingUser = userRepository.findUserByUsername(request.getUsername());
+        if (existingUser.isPresent()) {
+             throw new IllegalArgumentException("Username or password does not meet the requirements.");
+        }
+
+        if (!passwordConstraintValidator.isValid(request.getPassword())){
+            throw new IllegalArgumentException("Username or password does not meet the requirements.");
+        }
 
         User user = new User();
         user.setName(request.getName());
@@ -57,12 +61,6 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         
         user = userRepository.save(user);
-        // try {
-        //     user = userRepository.save(user);
-        // } catch (DataIntegrityViolationException e) {
-        //     throw new IllegalStateException("User cannot be registered. Possible duplicate username.", e);
-        // }
-
         String token = jwtService.generateToken(user);
         return new JWT(token);
     }
