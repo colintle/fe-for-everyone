@@ -69,12 +69,12 @@ public class JWTFilter extends OncePerRequestFilter{
         catch(ExpiredJwtException e){
             Map<String, Object> errorDetails = new HashMap<>();
             errorDetails.put("message", "The token has expired. Please log in again.");
+            errorDetails.put("expired", true);
 
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
 
             mapper.writeValue(response.getWriter(), errorDetails);
             return;
         }
- 
     }
 }
