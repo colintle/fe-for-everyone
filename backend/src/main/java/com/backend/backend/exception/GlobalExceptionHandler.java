@@ -4,6 +4,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import io.jsonwebtoken.security.SignatureException;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,5 +33,15 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDetails);
     }
+
+    @ExceptionHandler(SignatureException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ResponseEntity<Object> handleSignatureException(SignatureException e) {
+        Map<String, Object> errorDetails = new HashMap<>();
+        errorDetails.put("message", "Either access token or refresh token is invalid");
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorDetails);
+    }
+
 }
 

@@ -55,11 +55,11 @@ public class JWTService {
          return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateToken(User user) {
+    public String generateToken(User user, int time) {
         return Jwts.builder()
                 .setSubject(user.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 24*60*60*1000))
+                .setExpiration(new Date(System.currentTimeMillis() + time))
                 .signWith(getSigninKey())
                 .claim("username", user.getUsername())
                 .claim("name", user.getName())
