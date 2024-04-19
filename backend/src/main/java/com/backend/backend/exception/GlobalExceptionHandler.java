@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;
 
 import java.util.HashMap;
@@ -29,7 +30,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<Object> handleIllegalArgumentException(IllegalArgumentException e) {
         Map<String, Object> errorDetails = new HashMap<>();
-        errorDetails.put("message", "Username and/or password does not meet the requirements.");
+        errorDetails.put("message", e.getMessage());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDetails);
     }
@@ -41,6 +42,14 @@ public class GlobalExceptionHandler {
         errorDetails.put("message", "Either access token or refresh token is invalid");
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorDetails);
+    }
+
+    @ExceptionHandler(ExpiredJwtException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ResponseEntity<Object> handleExpiredJwtException(SignatureException e){
+        Map<String, Object> errorDetails = new HashMap<>();
+            errorDetails.put("message", "The token has expired. Please log in again.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorDetails);
     }
 
 }

@@ -48,8 +48,8 @@ public class UserService {
         );
 
         User user = userRepository.findUserByUsername(request.getUsername()).orElseThrow();
-        String token = jwtService.generateToken(user, 24*60*60*1000);
-        String refreshToken = jwtService.generateToken(user, 7*24*60*60*1000);
+        String token = jwtService.generateToken(user, 24*60*60*1000, false);
+        String refreshToken = jwtService.generateToken(user, 7*24*60*60*1000, true);
         CookieUtils.create(response, "refreshToken", refreshToken, true, 86400 * 7); // 7 days and secure
 
         return new JWT(token);
@@ -76,8 +76,8 @@ public class UserService {
         
         user = userRepository.save(user);
         // 24 hour expiration
-        String token = jwtService.generateToken(user, 24*60*60*1000);
-        String refreshToken = jwtService.generateToken(user, 7*24*60*60*1000);
+        String token = jwtService.generateToken(user, 24*60*60*1000, false);
+        String refreshToken = jwtService.generateToken(user, 7*24*60*60*1000, true);
         CookieUtils.create(response, "refreshToken", refreshToken, true, 86400 * 7); // 7 days and secure
 
         return new JWT(token);
@@ -94,7 +94,7 @@ public class UserService {
     public JWT refresh(HttpServletRequest request ,HttpServletResponse response){
         String refreshToken = CookieUtils.getCookieValue(request, "refreshToken");
 
-        String username = jwtService.extractUsername(refreshToken);
+        String username = jwtService.extractUsername(refreshToken, true);
 
         if (username == null){
             throw new IllegalArgumentException("Access token and/or refresh token is invalid.");
@@ -102,14 +102,14 @@ public class UserService {
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-        if (!jwtService.isValid(refreshToken, userDetails)) {
+        if (!jwtService.isValid(refreshToken, userDetails, true)) {
             throw new IllegalArgumentException("Access token and/or refresh token is invalid.");
         }
 
         Optional<User> user = userRepository.findUserByUsername(username);
 
-        String newAccess = jwtService.generateToken(user.get(), 24*60*60*1000);
-        String newRefresh = jwtService.generateToken(user.get(), 7*24*60*60*1000);
+        String newAccess = jwtService.generateToken(user.get(), 24*60*60*1000, false);
+        String newRefresh = jwtService.generateToken(user.get(), 7*24*60*60*1000, true);
 
         CookieUtils.create(response, "refreshToken", newRefresh, true, 86400 * 7);
 

@@ -17,50 +17,56 @@ import io.jsonwebtoken.security.Keys;
 
 @Service
 public class JWTService {
-    private String secretKey = System.getenv("SECRET_KEY");
+    private String access = System.getenv("ACCESS_KEY");
+    private String refresh = System.getenv("REFRESH_KEY");
 
-    public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
+    public String extractUsername(String token, boolean cookie) {
+        return extractClaim(token, Claims::getSubject, cookie);
     }
 
-    public boolean isValid(String token, UserDetails user) {
-        String email = extractUsername(token);
-        return (email.equals(user.getUsername())) && !isTokenExpired(token);
+    public boolean isValid(String token, UserDetails user, boolean cookie) {
+        String email = extractUsername(token, cookie);
+        return (email.equals(user.getUsername())) && !isTokenExpired(token, cookie);
     }
 
-    public boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
+    public boolean isTokenExpired(String token, boolean cookie) {
+        return extractExpiration(token, cookie).before(new Date());
     }
 
-    private Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
+    private Date extractExpiration(String token, boolean cookie) {
+        return extractClaim(token, Claims::getExpiration, cookie);
     }
 
-    public <T> T extractClaim(String token, Function<Claims, T> resolver) {
-        Claims claims = extractAllClaims(token);
+    public <T> T extractClaim(String token, Function<Claims, T> resolver, boolean cookie) {
+        Claims claims = extractAllClaims(token, cookie);
         return resolver.apply(claims);
     }
 
-    private Claims extractAllClaims(String token) {
+    private Claims extractAllClaims(String token, boolean cookie) {
          return  Jwts
                  .parserBuilder()
-                 .setSigningKey(getSigninKey())
+                 .setSigningKey(cookie ? getSigninRefreshKey() : getSigninAccessKey())
                  .build()
                  .parseClaimsJws(token)
                  .getBody();
     }
 
-    private SecretKey getSigninKey() {
-         byte[] keyBytes = Decoders.BASE64URL.decode(secretKey);
+    private SecretKey getSigninAccessKey() {
+         byte[] keyBytes = Decoders.BASE64URL.decode(access);
          return Keys.hmacShaKeyFor(keyBytes);
-    }
+    } 
 
-    public String generateToken(User user, int time) {
+    private SecretKey getSigninRefreshKey() {
+        byte[] keyBytes = Decoders.BASE64URL.decode(refresh);
+        return Keys.hmacShaKeyFor(keyBytes);
+   }
+
+    public String generateToken(User user, int time, boolean cookie) {
         return Jwts.builder()
                 .setSubject(user.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + time))
-                .signWith(getSigninKey())
+                .signWith(cookie ? getSigninRefreshKey() : getSigninAccessKey())
                 .claim("username", user.getUsername())
                 .claim("name", user.getName())
                 .compact();

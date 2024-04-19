@@ -9,7 +9,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.backend.backend.JWT.JWT;
+import com.backend.backend.config.RateLimitService;
 
+import io.github.bucket4j.Bucket;
+import io.github.bucket4j.ConsumptionProbe;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -20,36 +23,46 @@ import org.springframework.web.bind.annotation.GetMapping;
 @RestController
 public class UserController {
     private final UserService userService;
+    private final RateLimitService rateLimitService;
+    private Bucket bucket;
 
-     public UserController(UserService userService) {
-         this.userService = userService;
+     public UserController(UserService userService, RateLimitService rateLimitService) {
+        this.userService = userService;
+        this.rateLimitService = rateLimitService;
+        bucket = rateLimitService.createBucket();
     }
-
-    @PostMapping("/register")
-    public ResponseEntity<JWT> register(
-             @RequestBody User request,
-             HttpServletResponse response
-             ) {
-         return ResponseEntity.ok(userService.register(request, response));
-     }
-
-     @PostMapping("/login")
-     public ResponseEntity<JWT> login(
-             @RequestBody User request,
-             HttpServletResponse response
-     ) {
-         return ResponseEntity.ok(userService.authenticate(request, response));
-     }
 
      @DeleteMapping("/signout")
      public ResponseEntity<Object> signout(HttpServletResponse response) {    
         return ResponseEntity.status(HttpStatus.OK).body(userService.logout(response));
      }
 
-     @GetMapping("/refresh")
-     public ResponseEntity<JWT> refresh(HttpServletRequest request, HttpServletResponse response) throws SignatureException {
-         return ResponseEntity.ok(userService.refresh(request, response));
-     }
+     @PostMapping("/register")
+    public ResponseEntity<Object> register(@RequestBody User request, HttpServletResponse response) {
+        ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
+        if (!probe.isConsumed()) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body("Rate limit exceeded. Try again later.");
+        }
+        return ResponseEntity.ok(userService.register(request, response));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<Object> login(@RequestBody User request, HttpServletResponse response) {
+        ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
+        if (!probe.isConsumed()) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body("Rate limit exceeded. Try again later.");
+        }
+        return ResponseEntity.ok(userService.authenticate(request, response));
+    }
+
+    @GetMapping("/refresh")
+    public ResponseEntity<Object> refresh(HttpServletRequest request, HttpServletResponse response) throws SignatureException {
+        ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
+        if (!probe.isConsumed()) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body("Rate limit exceeded. Try again later.");
+        }
+        return ResponseEntity.ok(userService.refresh(request, response));
+    }
      
      
 }
