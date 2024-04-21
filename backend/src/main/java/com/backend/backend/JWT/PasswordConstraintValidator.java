@@ -1,4 +1,4 @@
-package com.backend.backend.User;
+package com.backend.backend.JWT;
 import org.springframework.stereotype.Component;
 import java.util.Arrays;
 import org.passay.*;

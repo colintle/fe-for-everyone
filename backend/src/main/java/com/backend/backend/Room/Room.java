@@ -12,8 +12,8 @@ public class Room {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(name = "roomId", updatable = false, nullable = false)
-    private UUID roomId;
+    @Column(name = "roomID", updatable = false, nullable = false)
+    private UUID roomID;
 
     @Column(name = "roomName", nullable = false)
     private String roomName;
@@ -26,7 +26,7 @@ public class Room {
 
     // Getters
     public UUID getRoomId() {
-        return roomId;
+        return roomID;
     }
 
     public String getRoomName() {
@@ -42,8 +42,8 @@ public class Room {
     }
 
     // Setters
-    public void setRoomId(UUID roomId) {
-        this.roomId = roomId;
+    public void setRoomId(UUID roomID) {
+        this.roomID = roomID;
     }
 
     public void setRoomName(String roomName) {

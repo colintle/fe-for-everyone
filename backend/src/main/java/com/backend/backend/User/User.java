@@ -2,14 +2,10 @@ package com.backend.backend.User;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Optional;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 
 import com.backend.backend.Room.Room;
 
@@ -43,7 +39,7 @@ public class User implements UserDetails{
     private Role role;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "roomID", nullable = true)
+    @JoinColumn(name = "roomID", nullable = true, referencedColumnName = "roomID")
     private Room room;
 
     //getters and setters

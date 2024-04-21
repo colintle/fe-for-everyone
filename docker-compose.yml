@@ -29,7 +29,9 @@ services:
     ports:
       - "8081:8081"
     volumes:
-      - ./websocket-service/:/app
+      - ./websocket-service/:/app:delegated
+    networks:
+      - spring-boot-postgres-network
   db:
     container_name: postgres-container
     image: postgres:14.1-alpine
@@ -40,8 +42,20 @@ services:
       - db:/var/lib/postgresql/data
     networks:
       - spring-boot-postgres-network
-  
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
+    networks:
+      - spring-boot-postgres-network
+    volumes:
+      - redis-data:/data
+
 volumes:
   db:
+  redis-data:
+
 networks:
   spring-boot-postgres-network:
+    name: spring-boot-postgres-network
+    driver: bridge

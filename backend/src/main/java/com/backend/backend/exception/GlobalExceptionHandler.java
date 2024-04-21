@@ -1,4 +1,4 @@
-package com.backend.backend.exception;
+package com.backend.backend.Exception;
 
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;

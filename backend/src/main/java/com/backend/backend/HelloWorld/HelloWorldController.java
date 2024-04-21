@@ -23,5 +23,7 @@ class HelloWorldController {
         UserDetails userDetails = (UserDetails) authToken.getPrincipal();
 
         return userDetails;
+
+        // return "hello world";
     }
 }

@@ -1,11 +1,8 @@
 package com.backend.backend.User;
 
-import java.security.SignatureException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
-import javax.swing.text.html.Option;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.backend.backend.Cookie.CookieUtils;
 import com.backend.backend.JWT.JWT;
 import com.backend.backend.JWT.JWTService;
+import com.backend.backend.JWT.PasswordConstraintValidator;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -52,7 +50,7 @@ public class UserService {
         String refreshToken = jwtService.generateToken(user, 7*24*60*60*1000, true);
         CookieUtils.create(response, "refreshToken", refreshToken, true, 86400 * 7); // 7 days and secure
 
-        return new JWT(token);
+        return new JWT(token, user.getUsername());
     }
 
     public JWT register(User request, HttpServletResponse response) {
@@ -80,7 +78,7 @@ public class UserService {
         String refreshToken = jwtService.generateToken(user, 7*24*60*60*1000, true);
         CookieUtils.create(response, "refreshToken", refreshToken, true, 86400 * 7); // 7 days and secure
 
-        return new JWT(token);
+        return new JWT(token, user.getUsername());
     }
 
     public Map<String, Object> logout(HttpServletResponse response){
@@ -106,13 +104,13 @@ public class UserService {
             throw new IllegalArgumentException("Access token and/or refresh token is invalid.");
         }
 
-        Optional<User> user = userRepository.findUserByUsername(username);
+        User user = userRepository.findUserByUsername(username).orElseThrow();
 
-        String newAccess = jwtService.generateToken(user.get(), 24*60*60*1000, false);
-        String newRefresh = jwtService.generateToken(user.get(), 7*24*60*60*1000, true);
+        String newAccess = jwtService.generateToken(user, 24*60*60*1000, false);
+        String newRefresh = jwtService.generateToken(user, 7*24*60*60*1000, true);
 
         CookieUtils.create(response, "refreshToken", newRefresh, true, 86400 * 7);
 
-        return new JWT(newAccess);
+        return new JWT(newAccess, user.getUsername());
     }
 }
