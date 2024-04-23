@@ -69,6 +69,7 @@ public class JWTService {
                 .signWith(cookie ? getSigninRefreshKey() : getSigninAccessKey())
                 .claim("username", user.getUsername())
                 .claim("name", user.getName())
+                .claim("role", user.getRole())
                 .compact();
     }
 }

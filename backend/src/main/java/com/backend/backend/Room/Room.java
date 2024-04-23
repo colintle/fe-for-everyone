@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import org.hibernate.annotations.GenericGenerator;
 
+import com.backend.backend.User.User;
+
 @Entity
 @Table(name = "rooms")
 public class Room {
@@ -23,6 +25,10 @@ public class Room {
 
     @Column(name = "userCount", nullable = false)
     private int userCount = 0;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "adminID")
+    private User admin;
 
     // Getters
     public UUID getRoomId() {
@@ -65,5 +71,13 @@ public class Room {
 
     public void decrementUserCount() {
         this.userCount = Math.max(0, this.userCount - 1); // Ensure userCount doesn't go below 0
+    }
+
+    public User getAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(User admin) {
+        this.admin = admin;
     }
 }
