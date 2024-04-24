@@ -15,9 +15,6 @@ import com.backend.backend.User.User;
 import com.backend.backend.User.User.Role;
 import com.backend.backend.User.UserRepository;
 
-import jakarta.persistence.EntityNotFoundException;
-import org.springframework.transaction.annotation.Transactional;
-
 @Service
 public class RoomService {
     
@@ -45,9 +42,10 @@ public class RoomService {
         Map<String, Object> attributes = new HashMap<>();
         User user = getUserWithRoom(userDetails.getId());
 
-        attributes.put("room", user.getRoom().getRoomId());
+        attributes.put("room", user.getRoom() == null ? null : user.getRoom().getRoomID());
         attributes.put("role", user.getRole());
-        attributes.put("admin", user.getRoom().getAdmin().getName());
+        attributes.put("adminID", user.getRoom() == null ? null : user.getRoom().getAdmin().getId());
+        attributes.put("admin", user.getRoom() == null ? null : user.getRoom().getAdmin().getName());
         return attributes;
     }
 
@@ -66,8 +64,6 @@ public class RoomService {
     public void deleteRoom(UUID roomID){
         userRepository.nullifyRoomInUsers(roomID);
         roomRepository.deleteById(roomID);
-        System.out.println("Size of the rooms table");
-        System.out.println(roomRepository.findAll().size());
     }
 
     private void assignNewAdmin(Room room) {
@@ -90,26 +86,28 @@ public class RoomService {
             response.put("message", "User is not in a room.");
             return response;
         }
+
         User userDetails = getUserDetails(authentication);
-        Room currentRoom = roomRepository.findById(userDetails.getRoom().getRoomId()).orElseThrow();
+        User userWithRoom = getUserWithRoom(userDetails.getId());
+        Room currentRoom = userWithRoom.getRoom();
+
         boolean isAdmin = userDetails.getRole() == User.Role.ADMIN;
 
         userDetails.setRole(null);
         userDetails.setRoom(null);
+        userRepository.save(userDetails);
 
         currentRoom.decrementUserCount();
         roomRepository.save(currentRoom);
 
         if (currentRoom.getUserCount() == 0){
-            deleteRoom(currentRoom.getRoomId());
+            deleteRoom(currentRoom.getRoomID());
         }
         else if (isAdmin){
             assignNewAdmin(currentRoom);
         }
 
-        userRepository.save(userDetails);
-
-        response.put("message", "Successful.");
+        response.put("message", "You have successfully left your room.");
 
         return response;
     }
@@ -121,28 +119,34 @@ public class RoomService {
         newRoom.setRoomName(requestBody.getRoomName());
         newRoom.setProblemStatementPath(requestBody.getProblemStatementPath());
         newRoom.incrementUserCount();
-    
+        newRoom.setAdmin(user);
+
         roomRepository.save(newRoom);
     
         user.setRole(Role.ADMIN);
         user.setRoom(newRoom);
-    
-        newRoom.setAdmin(user);
-    
+            
         userRepository.save(user);
     
         Map<String, Object> response = new HashMap<>();
-        response.put("room", newRoom);
+        response.put("room", newRoom.getRoomID());
+        response.put("problemStatementPath", newRoom.getProblemStatementPath());
+        response.put("admin", newRoom.getAdmin().getName());
+        response.put("adminID", newRoom.getAdmin().getId());
         response.put("message", "Room created successfully with admin privileges.");
         return response;
     }
     
     public Map<String, Object> joinRoom(Room requestBody, Authentication authentication){
-        UUID roomID = requestBody.getRoomId();
+        System.out.println(requestBody);
+        UUID roomID = requestBody.getRoomID();
 
         if (roomRepository.existsById(roomID)){
             User user = getUserDetails(authentication);
-            Room room = roomRepository.getReferenceById(roomID);
+            // Room room = roomRepository.getReferenceById(roomID);
+            Optional<Room> ifRoom = roomRepository.findById(roomID);
+
+            Room room = ifRoom.get();
             user.setRole(Role.USER);
             user.setRoom(room);
 
@@ -151,12 +155,15 @@ public class RoomService {
             userRepository.save(user);
 
             Map<String, Object> response = new HashMap<>();
-            response.put("room", room);
+            response.put("room", room.getRoomID());
+            response.put("problemStatementPath", room.getProblemStatementPath());
+            response.put("admin", room.getAdmin().getName());
+            response.put("adminID", room.getAdmin().getId());
             response.put("message", "Room successfully joined.");
             return response;
         }
         else{
-            throw new IllegalArgumentException("Room does not exist");
+            throw new IllegalArgumentException("Room does not exist.");
         }
     }
 }

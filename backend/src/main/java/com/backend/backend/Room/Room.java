@@ -31,7 +31,7 @@ public class Room {
     private User admin;
 
     // Getters
-    public UUID getRoomId() {
+    public UUID getRoomID() {
         return roomID;
     }
 
@@ -48,7 +48,7 @@ public class Room {
     }
 
     // Setters
-    public void setRoomId(UUID roomID) {
+    public void setRoomID(UUID roomID) {
         this.roomID = roomID;
     }
 
