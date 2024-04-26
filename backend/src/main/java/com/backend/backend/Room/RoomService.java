@@ -39,14 +39,16 @@ public class RoomService {
 
     public Map<String, Object> getJoinedRoom(Authentication authentication){
         User userDetails = getUserDetails(authentication);
-        Map<String, Object> attributes = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
         User user = getUserWithRoom(userDetails.getId());
 
-        attributes.put("room", user.getRoom() == null ? null : user.getRoom().getRoomID());
-        attributes.put("role", user.getRole());
-        attributes.put("adminID", user.getRoom() == null ? null : user.getRoom().getAdmin().getId());
-        attributes.put("admin", user.getRoom() == null ? null : user.getRoom().getAdmin().getName());
-        return attributes;
+        response.put("room", user.getRoom() == null ? null : user.getRoom().getRoomID());
+        response.put("role", user.getRole());
+        response.put("adminID", user.getRoom() == null ? null : user.getRoom().getAdmin().getId());
+        response.put("admin", user.getRoom() == null ? null : user.getRoom().getAdmin().getName());
+        response.put("problemStatementPath", user.getRoom() == null ? null : user.getRoom().getProblemStatementPath());
+
+        return response;
     }
 
 
@@ -113,6 +115,10 @@ public class RoomService {
     }
 
     public Map<String, Object> createRoom(Room requestBody, Authentication authentication){
+        if (requestBody.getRoomName().isEmpty() || requestBody.getProblemStatementPath().isEmpty()) {
+            throw new IllegalArgumentException("One of the required fields is empty.");
+        }
+
         Room newRoom = new Room();
         User user = getUserDetails(authentication);
     
@@ -138,12 +144,14 @@ public class RoomService {
     }
     
     public Map<String, Object> joinRoom(Room requestBody, Authentication authentication){
-        System.out.println(requestBody);
+        if (requestBody.getRoomID() == null) {
+            throw new IllegalArgumentException("One of the required fields is empty.");
+        }
+
         UUID roomID = requestBody.getRoomID();
 
         if (roomRepository.existsById(roomID)){
             User user = getUserDetails(authentication);
-            // Room room = roomRepository.getReferenceById(roomID);
             Optional<Room> ifRoom = roomRepository.findById(roomID);
 
             Room room = ifRoom.get();
@@ -165,5 +173,60 @@ public class RoomService {
         else{
             throw new IllegalArgumentException("Room does not exist.");
         }
+    }
+
+    public Map<String, Object> changeProblem(Room requestBody, Authentication authentication){
+        if (requestBody.getProblemStatementPath().isEmpty()) {
+            throw new IllegalArgumentException("One of the required fields is empty.");
+        }
+
+        User userDetails = getUserDetails(authentication);
+        User userWithRoom = getUserWithRoom(userDetails.getId());
+        Room currentRoom = userWithRoom.getRoom();
+
+        currentRoom.setProblemStatementPath(requestBody.getProblemStatementPath());
+        roomRepository.save(currentRoom);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("problemStatementPath", requestBody.getProblemStatementPath());
+        response.put("message", "Successfully changed the problem.");
+
+        return response;
+    }
+
+    public Map<String, Object> changeAdmin(Map<String,Object> requestBody, Authentication authentication){
+        if (requestBody.get("userID") == null) {
+            throw new IllegalArgumentException("One of the required fields is empty.");
+        }
+
+        User userDetails = getUserDetails(authentication);
+        User userWithRoom = getUserWithRoom(userDetails.getId());
+        Room currentRoom = userWithRoom.getRoom();
+
+        Optional<User> potentialUser = userRepository.findById((Long) requestBody.get("userID"));
+
+        if (!potentialUser.isPresent()){
+            throw new IllegalArgumentException("User in question does not exist.");
+        }
+
+        User secondUser = potentialUser.get();
+
+        currentRoom.setAdmin(secondUser);
+        roomRepository.save(currentRoom);
+
+        userWithRoom.setRoom(null);
+        userRepository.save(userWithRoom);
+
+        secondUser.setRoom(currentRoom);
+        userRepository.save(secondUser);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Successfully changed admin");
+        response.put("admin", currentRoom.getAdmin().getName());
+        response.put("adminID", currentRoom.getAdmin().getId());
+        response.put("room", currentRoom.getRoomID());
+        response.put("problemStatementPath", currentRoom.getProblemStatementPath());
+
+        return response;
     }
 }

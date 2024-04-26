@@ -20,7 +20,7 @@ public class Room {
     @Column(name = "roomName", nullable = false)
     private String roomName;
 
-    @Column(name = "problemStatementPath")
+    @Column(name = "problemStatementPath", nullable = false)
     private String problemStatementPath;
 
     @Column(name = "userCount", nullable = false)
