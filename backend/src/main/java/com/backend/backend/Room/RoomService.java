@@ -194,7 +194,7 @@ public class RoomService {
         return response;
     }
 
-    public Map<String, Object> changeAdmin(Map<String,Object> requestBody, Authentication authentication){
+    public Map<String, Object> changeAdmin(Map<String,String> requestBody, Authentication authentication){
         if (requestBody.get("userID") == null) {
             throw new IllegalArgumentException("One of the required fields is empty.");
         }
@@ -203,7 +203,7 @@ public class RoomService {
         User userWithRoom = getUserWithRoom(userDetails.getId());
         Room currentRoom = userWithRoom.getRoom();
 
-        Optional<User> potentialUser = userRepository.findById((Long) requestBody.get("userID"));
+        Optional<User> potentialUser = userRepository.findById(Long.parseLong(requestBody.get("userID")));
 
         if (!potentialUser.isPresent()){
             throw new IllegalArgumentException("User in question does not exist.");
@@ -214,10 +214,11 @@ public class RoomService {
         currentRoom.setAdmin(secondUser);
         roomRepository.save(currentRoom);
 
-        userWithRoom.setRoom(null);
+        userWithRoom.setRole(Role.USER);
         userRepository.save(userWithRoom);
 
         secondUser.setRoom(currentRoom);
+        secondUser.setRole(Role.ADMIN);
         userRepository.save(secondUser);
 
         Map<String, Object> response = new HashMap<>();
