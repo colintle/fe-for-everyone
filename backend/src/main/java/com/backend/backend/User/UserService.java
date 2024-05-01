@@ -82,7 +82,6 @@ public class UserService {
     }
 
     public Map<String, Object> logout(HttpServletResponse response){
-        System.out.println("Inside the logout route");
         CookieUtils.clear(response, "refreshToken");
         Map<String, Object> body = new HashMap<>();  
         body.put("message", "Logged out successfully");

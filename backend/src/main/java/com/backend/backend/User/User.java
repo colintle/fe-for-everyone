@@ -2,12 +2,15 @@ package com.backend.backend.User;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import jakarta.validation.constraints.NotBlank;
 
 import com.backend.backend.Room.Room;
+import com.backend.backend.Problem.Problem;
 
 import jakarta.persistence.*;
 
@@ -21,6 +24,7 @@ public class User implements UserDetails{
     
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "userID", updatable = false, nullable = false)
     private long id;
 
     @Column(name = "name", nullable = false)
@@ -41,6 +45,9 @@ public class User implements UserDetails{
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "roomID", nullable = true, referencedColumnName = "roomID")
     private Room room;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Problem> problems;
 
     //getters and setters
 
@@ -119,6 +126,14 @@ public class User implements UserDetails{
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    public List<Problem> getProblems() {
+        return problems;
+    }
+
+    public void setProblems(List<Problem> problems) {
+        this.problems = problems;
     }
 }
 
