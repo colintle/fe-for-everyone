@@ -7,21 +7,38 @@ import java.util.Map;
 
 @Service
 public class MessagePublisher {
-    private RedisTemplate<String, Object> redisTemplate;
-    private Map<String, ChannelTopic> topics;
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final ChannelTopic createRoomTopic;
+    private final ChannelTopic deleteRoomTopic;
+    private final ChannelTopic userJoinedTopic;
+    private final ChannelTopic userLeftTopic;
 
-    public MessagePublisher(RedisTemplate<String, Object> redisTemplate, Map<String, ChannelTopic> topics) {
+    public MessagePublisher(RedisTemplate<String, Object> redisTemplate,
+                            ChannelTopic createRoomTopic,
+                            ChannelTopic deleteRoomTopic,
+                            ChannelTopic userJoinedTopic,
+                            ChannelTopic userLeftTopic) {
         this.redisTemplate = redisTemplate;
-        this.topics = topics;
+        this.createRoomTopic = createRoomTopic;
+        this.deleteRoomTopic = deleteRoomTopic;
+        this.userJoinedTopic = userJoinedTopic;
+        this.userLeftTopic = userLeftTopic;
     }
 
-    public void publish(final String topicName, final String message) {
-        ChannelTopic topic = topics.get(topicName);
-        if (topic != null) {
-            redisTemplate.convertAndSend(topic.getTopic(), message);
-        } else {
-            throw new IllegalArgumentException("Invalid topic name");
-        }
+    public void publishCreateRoom(String message) {
+        redisTemplate.convertAndSend(createRoomTopic.getTopic(), message);
+    }
+
+    public void publishDeleteRoom(String message) {
+        redisTemplate.convertAndSend(deleteRoomTopic.getTopic(), message);
+    }
+
+    public void publishUserJoined(String message) {
+        redisTemplate.convertAndSend(userJoinedTopic.getTopic(), message);
+    }
+
+    public void publishUserLeft(String message) {
+        redisTemplate.convertAndSend(userLeftTopic.getTopic(), message);
     }
 }
 

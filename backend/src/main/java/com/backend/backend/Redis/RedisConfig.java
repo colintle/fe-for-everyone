@@ -2,41 +2,45 @@ package com.backend.backend.Redis;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
-
-import java.util.Map;
-import java.util.HashMap;
+import org.springframework.data.redis.serializer.GenericToStringSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
 public class RedisConfig {
+
+    @Bean
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
+        template.setConnectionFactory(connectionFactory);
+        
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new GenericToStringSerializer<>(Object.class));
+        template.setHashKeySerializer(new StringRedisSerializer());
+        template.setHashValueSerializer(new GenericToStringSerializer<>(Object.class));
+        
+        return template;
+    }
+
     @Bean
     public ChannelTopic createRoomTopic() {
-        return new ChannelTopic("createRoom");
+        return new ChannelTopic("create_room");
     }
 
     @Bean
     public ChannelTopic deleteRoomTopic() {
-        return new ChannelTopic("deleteRoom");
+        return new ChannelTopic("delete_room");
     }
 
     @Bean
     public ChannelTopic userJoinedTopic() {
-        return new ChannelTopic("userJoined");
+        return new ChannelTopic("user_joined");
     }
 
     @Bean
     public ChannelTopic userLeftTopic() {
-        return new ChannelTopic("userLeft");
-    }
-
-    // Map to store all topics
-    @Bean
-    public Map<String, ChannelTopic> topicsMap() {
-        Map<String, ChannelTopic> topics = new HashMap<>();
-        topics.put("createRoom", createRoomTopic());
-        topics.put("deleteRoom", deleteRoomTopic());
-        topics.put("userJoined", userJoinedTopic());
-        topics.put("userLeft", userLeftTopic());
-        return topics;
+        return new ChannelTopic("user_left");
     }
 }
