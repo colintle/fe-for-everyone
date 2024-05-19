@@ -12,34 +12,47 @@ public class MessagePublisher {
     private final ChannelTopic deleteRoomTopic;
     private final ChannelTopic userJoinedTopic;
     private final ChannelTopic userLeftTopic;
+    private final ChannelTopic changeAdminTopic;
+    private final ChannelTopic changeProblemTopic;
 
     public MessagePublisher(RedisTemplate<String, Object> redisTemplate,
                             ChannelTopic createRoomTopic,
                             ChannelTopic deleteRoomTopic,
                             ChannelTopic userJoinedTopic,
-                            ChannelTopic userLeftTopic) {
+                            ChannelTopic userLeftTopic,
+                            ChannelTopic changeAdminTopic,
+                            ChannelTopic changeProblemTopic) {
         this.redisTemplate = redisTemplate;
         this.createRoomTopic = createRoomTopic;
         this.deleteRoomTopic = deleteRoomTopic;
         this.userJoinedTopic = userJoinedTopic;
         this.userLeftTopic = userLeftTopic;
+        this.changeAdminTopic = changeAdminTopic;
+        this.changeProblemTopic = changeProblemTopic;
     }
 
-    public void publishCreateRoom(String message) {
+    public void publishCreateRoom(Object message) {
         redisTemplate.convertAndSend(createRoomTopic.getTopic(), message);
     }
 
-    public void publishDeleteRoom(String message) {
+    public void publishDeleteRoom(Object message) {
         redisTemplate.convertAndSend(deleteRoomTopic.getTopic(), message);
     }
 
-    public void publishUserJoined(String message) {
+    public void publishUserJoined(Object message) {
         redisTemplate.convertAndSend(userJoinedTopic.getTopic(), message);
     }
 
-    public void publishUserLeft(String message) {
+    public void publishUserLeft(Object message) {
         redisTemplate.convertAndSend(userLeftTopic.getTopic(), message);
+    }
+
+    public void publishChangeAdmin(Object message) {
+        redisTemplate.convertAndSend(changeAdminTopic.getTopic(), message);
+    }
+
+    public void publishChangeProblem(Object message) {
+        redisTemplate.convertAndSend(changeProblemTopic.getTopic(), message);
     }
 }
 
-// messagePublisher.publish("admin_notifications", message);

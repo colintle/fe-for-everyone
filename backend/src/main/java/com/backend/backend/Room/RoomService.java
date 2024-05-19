@@ -11,6 +11,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import com.backend.backend.Redis.MessagePublisher;
 import com.backend.backend.User.User;
 import com.backend.backend.User.User.Role;
 import com.backend.backend.User.UserRepository;
@@ -20,10 +21,12 @@ public class RoomService {
     
     private final UserRepository userRepository;
     private final RoomRepository roomRepository;
+    private final MessagePublisher messagePublisher;
 
-    public RoomService(UserRepository userRepository, RoomRepository roomRepository){
+    public RoomService(UserRepository userRepository, RoomRepository roomRepository, MessagePublisher messagePublisher){
         this.userRepository = userRepository;
         this.roomRepository = roomRepository;
+        this.messagePublisher = messagePublisher;
     }
 
     public User getUserDetails(Authentication authentication){
@@ -82,6 +85,7 @@ public class RoomService {
     }
 
     public Map<String, Object> leaveRoom(Authentication authentication){
+        Map<String, Object> redisResponse = new HashMap<>();
         Map<String, Object> response = new HashMap<>();
 
         if (!ifJoinedRoom(authentication)){
@@ -102,13 +106,19 @@ public class RoomService {
         currentRoom.decrementUserCount();
         roomRepository.save(currentRoom);
 
+        redisResponse.put("userID", userDetails.getId());
+        redisResponse.put("user", userDetails.getName());
+        redisResponse.put("room", currentRoom.getRoomID());
+
         if (currentRoom.getUserCount() == 0){
             deleteRoom(currentRoom.getRoomID());
+            messagePublisher.publishDeleteRoom(redisResponse);
         }
         else if (isAdmin){
             assignNewAdmin(currentRoom);
         }
 
+        messagePublisher.publishUserLeft(redisResponse);
         response.put("message", "You have successfully left your room.");
 
         return response;
@@ -140,6 +150,8 @@ public class RoomService {
         response.put("admin", newRoom.getAdmin().getName());
         response.put("adminID", newRoom.getAdmin().getId());
         response.put("message", "Room created successfully with admin privileges.");
+
+        messagePublisher.publishCreateRoom(response);
         return response;
     }
     
@@ -168,6 +180,13 @@ public class RoomService {
             response.put("admin", room.getAdmin().getName());
             response.put("adminID", room.getAdmin().getId());
             response.put("message", "Room successfully joined.");
+
+            Map<String, Object> redisResponse = new HashMap<>();
+            redisResponse.put("userID", user.getId());
+            redisResponse.put("user", user.getName());
+            redisResponse.put("room", room.getRoomID());
+
+            messagePublisher.publishUserJoined(redisResponse);
             return response;
         }
         else{
@@ -190,6 +209,9 @@ public class RoomService {
         Map<String, Object> response = new HashMap<>();
         response.put("problemStatementPath", requestBody.getProblemStatementPath());
         response.put("message", "Successfully changed the problem.");
+        response.put("room", currentRoom.getRoomID());
+
+        messagePublisher.publishChangeProblem(response);
 
         return response;
     }
@@ -227,6 +249,8 @@ public class RoomService {
         response.put("adminID", currentRoom.getAdmin().getId());
         response.put("room", currentRoom.getRoomID());
         response.put("problemStatementPath", currentRoom.getProblemStatementPath());
+
+        messagePublisher.publishChangeProblem(response);
 
         return response;
     }

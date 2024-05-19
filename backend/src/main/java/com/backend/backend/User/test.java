@@ -4,6 +4,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.backend.backend.Redis.MessagePublisher;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -18,7 +21,10 @@ public class test {
     
     @GetMapping("/test")
     public ResponseEntity<String> testRedis() {
-        messagePublisher.publishCreateRoom("This is createRoom from Java API");
+        Map<String,String> response = new HashMap<>();
+        response.put("Test", "This is create from Java API");
+        messagePublisher.publishCreateRoom(response);
+
         return ResponseEntity.ok("Room update message sent");
     }
     
