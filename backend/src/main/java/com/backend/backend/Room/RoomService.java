@@ -48,7 +48,7 @@ public class RoomService {
         response.put("room", user.getRoom() == null ? null : user.getRoom().getRoomID());
         response.put("role", user.getRole());
         response.put("adminID", user.getRoom() == null ? null : user.getRoom().getAdmin().getId());
-        response.put("admin", user.getRoom() == null ? null : user.getRoom().getAdmin().getName());
+        response.put("admin", user.getRoom() == null ? null : user.getRoom().getAdmin().getUsername());
         response.put("problemStatementPath", user.getRoom() == null ? null : user.getRoom().getProblemStatementPath());
 
         return response;
@@ -107,7 +107,7 @@ public class RoomService {
         roomRepository.save(currentRoom);
 
         redisResponse.put("userID", userDetails.getId());
-        redisResponse.put("user", userDetails.getName());
+        redisResponse.put("user", userDetails.getUsername());
         redisResponse.put("room", currentRoom.getRoomID());
 
         if (currentRoom.getUserCount() == 0){
@@ -146,8 +146,9 @@ public class RoomService {
     
         Map<String, Object> response = new HashMap<>();
         response.put("room", newRoom.getRoomID());
+        response.put("roomName", newRoom.getRoomName());
         response.put("problemStatementPath", newRoom.getProblemStatementPath());
-        response.put("admin", newRoom.getAdmin().getName());
+        response.put("admin", newRoom.getAdmin().getUsername());
         response.put("adminID", newRoom.getAdmin().getId());
         response.put("message", "Room created successfully with admin privileges.");
 
@@ -177,13 +178,13 @@ public class RoomService {
             Map<String, Object> response = new HashMap<>();
             response.put("room", room.getRoomID());
             response.put("problemStatementPath", room.getProblemStatementPath());
-            response.put("admin", room.getAdmin().getName());
+            response.put("admin", room.getAdmin().getUsername());
             response.put("adminID", room.getAdmin().getId());
             response.put("message", "Room successfully joined.");
 
             Map<String, Object> redisResponse = new HashMap<>();
             redisResponse.put("userID", user.getId());
-            redisResponse.put("user", user.getName());
+            redisResponse.put("user", user.getUsername());
             redisResponse.put("room", room.getRoomID());
 
             messagePublisher.publishUserJoined(redisResponse);
@@ -245,7 +246,7 @@ public class RoomService {
 
         Map<String, Object> response = new HashMap<>();
         response.put("message", "Successfully changed admin");
-        response.put("admin", currentRoom.getAdmin().getName());
+        response.put("admin", currentRoom.getAdmin().getUsername());
         response.put("adminID", currentRoom.getAdmin().getId());
         response.put("room", currentRoom.getRoomID());
         response.put("problemStatementPath", currentRoom.getProblemStatementPath());

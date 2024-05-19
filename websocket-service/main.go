@@ -5,10 +5,26 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"encoding/json"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/gorilla/websocket"
 )
+
+type User struct {
+	UserID   string `json:"userID"`
+	Username string `json:"username"`
+}
+
+type Room struct {
+	Admin User `json:"admin"`
+	RoomID string `json:"roomID"`
+	ProblemStatement string  `json:"problemStatement"`
+	RoomName string `json:"roomName"`
+	Users []User `json:"users"`
+	Code string `json:"code"`
+}
+
 
 var ctx = context.Background()
 
@@ -46,14 +62,50 @@ func initializeRedis() {
 }
 
 func subscribeToRedis() {
-	pubsub := rdb.Subscribe(ctx, "create_room", "delete_room", "user_joined", "user_left")
+	subscribeToChannel("create_room")
+	subscribeToChannel("delete_room")
+	subscribeToChannel("user_joined")
+	subscribeToChannel("user_left")
+	subscribeToChannel("change_admin")
+	subscribeToChannel("change_problem")
+}
+
+func subscribeToChannel(channelName string) {
+	pubsub := rdb.Subscribe(ctx, channelName)
 	ch := pubsub.Channel()
 
 	go func() {
 		for msg := range ch {
-			fmt.Printf("Message on %s: %s\n", msg.Channel, msg.Payload)
+			handleMessage(channelName, msg)
 		}
 	}()
+}
+
+func handleMessage(channelName string, msg *redis.Message) {
+	var messageData map[string]string
+
+	err := json.Unmarshal([]byte(msg.Payload), &messageData)
+	if err != nil {
+		log.Printf("Error parsing JSON data from channel %s: %v", channelName, err)
+		return
+	}
+
+	switch channelName {
+	case "create_room":
+		handleCreateRoom(messageData)
+	case "delete_room":
+		handleDeleteRoom(messageData)
+	case "user_joined":
+		handleUserJoined(messageData)
+	case "user_left":
+		handleUserLeft(messageData)
+	case "change_admin":
+		handleChangeAdmin(messageData)
+	case "change_problem":
+		handleChangeProblem(messageData)
+	default:
+		log.Printf("Unhandled channel: %s", channelName)
+	}
 }
 
 func handleConnections(w http.ResponseWriter, r *http.Request) {
@@ -77,4 +129,61 @@ func handleConnections(w http.ResponseWriter, r *http.Request) {
 
 		log.Printf("Received via WebSocket: %s", message)
 	}
+}
+
+func handleCreateRoom(data map[string]string) {
+	admin := User{
+		UserID:   data["adminID"],
+		Username: data["admin"],
+	}
+
+	room := Room{
+		RoomID:           data["room"],
+		ProblemStatement: data["problemStatementPath"],
+		Admin:            admin,
+		RoomName:         data["roomName"],
+		Code:             "",
+		Users:            []User{admin},
+	}
+
+	exists, err := rdb.Exists(ctx, "room:"+room.RoomID).Result()
+	if err != nil {
+		log.Fatalf("Failed to check if room exists: %v", err)
+	}
+	if exists != 0 {
+		fmt.Println("Room already exists with ID:", room.RoomID)
+		return
+	}
+
+	jsonData, err := json.Marshal(room)
+	if err != nil {
+		log.Fatalf("Error serializing Room data: %v", err)
+	}
+
+	err = rdb.Set(ctx, "room:"+room.RoomID, jsonData, 0).Err()
+	if err != nil {
+		log.Fatalf("Failed to save room data to Redis: %v", err)
+	}
+
+	fmt.Println("Room data saved to Redis successfully")
+}
+
+func handleDeleteRoom(data map[string]string) {
+	fmt.Println("Handling delete room with data:", data)
+}
+
+func handleUserJoined(data map[string]string) {
+	fmt.Println("User joined with data:", data)
+}
+
+func handleUserLeft(data map[string]string) {
+	fmt.Println("User left with data:", data)
+}
+
+func handleChangeAdmin(data map[string]string) {
+	fmt.Println("Admin changed with data:", data)
+}
+
+func handleChangeProblem(data map[string]string) {
+	fmt.Println("Problem statement changed with data:", data)
 }

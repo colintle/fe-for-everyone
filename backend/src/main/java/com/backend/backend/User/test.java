@@ -22,7 +22,14 @@ public class test {
     @GetMapping("/test")
     public ResponseEntity<String> testRedis() {
         Map<String,String> response = new HashMap<>();
-        response.put("Test", "This is create from Java API");
+
+        response.put("room", "dummyRoomID");
+        response.put("roomName", "Dummy Conference Room");
+        response.put("problemStatementPath", "/dummy/path/to/problem"); 
+        response.put("admin", "dummyAdminUsername"); 
+        response.put("adminID", "dummyAdminID"); 
+        response.put("message", "Room created successfully with admin privileges."); 
+
         messagePublisher.publishCreateRoom(response);
 
         return ResponseEntity.ok("Room update message sent");
