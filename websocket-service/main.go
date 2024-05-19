@@ -39,7 +39,7 @@ func main() {
 
 	subscribeToRedis()
 
-	http.HandleFunc("/ws", handleConnections)
+	http.HandleFunc("/ws/", roomHandler)
     log.Println("WebSocket service starting on :8081...")
     err := http.ListenAndServe(":8081", nil)
     if err != nil {
@@ -108,28 +108,40 @@ func handleMessage(channelName string, msg *redis.Message) {
 	}
 }
 
-func handleConnections(w http.ResponseWriter, r *http.Request) {
-	ws, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Printf("WebSocket upgrade error: %v", err)
-		return
-	}
-	defer ws.Close()
+func roomHandler(w http.ResponseWriter, r *http.Request) {
+    roomID := r.URL.Path[len("/ws/"):] // Extract room ID from URL
+    
+    // Check if room exists in Redis
+    exists, err := rdb.Exists(ctx, "room:"+roomID).Result()
+    if err != nil {
+        http.Error(w, "Internal server error", http.StatusInternalServerError)
+        return
+    }
+    if exists == 0 {
+        http.Error(w, "Room not found", http.StatusNotFound)
+        return
+    }
 
-	for {
-		_, message, err := ws.ReadMessage()
-		if err != nil {
-			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("Unexpected close error: %v", err)
-			} else {
-				log.Printf("WebSocket read error: %v", err)
-			}
-			break
-		}
+    conn, err := upgrader.Upgrade(w, r, nil)
+    if err != nil {
+        fmt.Println("Error upgrading to WebSocket:", err)
+        return
+    }
+    defer conn.Close()
 
-		log.Printf("Received via WebSocket: %s", message)
-	}
+    fmt.Printf("Joined room: %s\n", roomID)
+
+    for {
+        _, message, err := conn.ReadMessage()
+        if err != nil {
+            fmt.Println("Error reading message:", err)
+            break
+        }
+        fmt.Printf("Received message in room %s: %s\n", roomID, string(message))
+        // Further message handling logic here
+    }
 }
+
 
 func handleCreateRoom(data map[string]string) {
 	admin := User{
