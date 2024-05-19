@@ -138,7 +138,6 @@ func roomHandler(w http.ResponseWriter, r *http.Request) {
             break
         }
         fmt.Printf("Received message in room %s: %s\n", roomID, string(message))
-        // Further message handling logic here
     }
 }
 
@@ -181,21 +180,163 @@ func handleCreateRoom(data map[string]string) {
 }
 
 func handleDeleteRoom(data map[string]string) {
-	fmt.Println("Handling delete room with data:", data)
+	roomID := data["room"]
+
+	key := "room:" + roomID
+    result, err := rdb.Del(ctx, key).Result()
+    if err != nil {
+        log.Printf("Failed to delete room %s from Redis: %v\n", roomID, err)
+        return
+    }
+    if result == 0 {
+        fmt.Printf("No room found with ID %s to delete\n", roomID)
+    } else {
+        fmt.Printf("Room %s deleted successfully\n", roomID)
+    }
+
 }
 
 func handleUserJoined(data map[string]string) {
-	fmt.Println("User joined with data:", data)
+    fmt.Println("User joined with data:", data)
+
+    userID := data["userID"]
+    username := data["user"]
+    roomID := data["room"]
+
+    exists, err := rdb.Exists(ctx, "room:"+roomID).Result()
+    if err != nil {
+        log.Fatalf("Failed to check if room exists: %v", err)
+        return
+    }
+    if exists == 0 {
+        fmt.Printf("No such room with ID %s exists\n", roomID)
+        return
+    }
+
+	user := User{
+		UserID: userID,
+		Username: username,
+	}
+
+	jsonData, err := json.Marshal(user)
+	if err != nil {
+		log.Fatalf("Error serializing User data: %v", err)
+	}
+
+    userKey := "user:" + userID
+    err = rdb.Set(ctx, userKey, jsonData, 0).Err()
+    if err != nil {
+        log.Fatalf("Failed to store user details for %s: %v\n", userID, err)
+        return
+    }
+
+    added, err := rdb.SAdd(ctx, "roomUsers:"+roomID, userID).Result()
+    if err != nil {
+        log.Fatalf("Failed to add user %s to room %s: %v\n", userID, roomID, err)
+        return
+    }
+    if added > 0 {
+        fmt.Printf("User %s added to room %s successfully\n", userID, roomID)
+    } else {
+        fmt.Printf("User %s already a member of room %s\n", userID, roomID)
+    }
 }
 
 func handleUserLeft(data map[string]string) {
-	fmt.Println("User left with data:", data)
+    fmt.Println("User left with data:", data)
+
+    userID := data["userID"]
+    roomID := data["room"]
+
+    fmt.Printf("User %s is leaving room %s\n", userID, roomID)
+
+    removed, err := rdb.SRem(ctx, "roomUsers:"+roomID, userID).Result()
+    if err != nil {
+        log.Fatalf("Failed to remove user %s from room %s: %v\n", userID, roomID, err)
+        return
+    }
+    if removed > 0 {
+        fmt.Printf("User %s removed from room %s successfully\n", userID, roomID)
+    } else {
+        fmt.Printf("User %s was not in room %s\n", userID, roomID)
+    }
+
+    _, err = rdb.Del(ctx, "user:"+userID).Result()
+    if err != nil {
+        log.Printf("Failed to delete user data for %s: %v\n", userID, err)
+    }
 }
 
 func handleChangeAdmin(data map[string]string) {
-	fmt.Println("Admin changed with data:", data)
+    fmt.Println("Admin changed with data:", data)
+
+    roomID := data["room"]
+    newAdminID := data["adminID"]
+    newAdminUsername := data["admin"]
+
+    roomData, err := rdb.Get(ctx, "room:"+roomID).Result()
+    if err != nil {
+        log.Fatalf("Failed to retrieve room data for room %s: %v\n", roomID, err)
+        return
+    }
+
+    var room Room
+    err = json.Unmarshal([]byte(roomData), &room)
+    if err != nil {
+        log.Fatalf("Error deserializing room data: %v", err)
+        return
+    }
+
+    room.Admin = User{
+        UserID: newAdminID,
+        Username: newAdminUsername,
+    }
+
+    updatedRoomData, err := json.Marshal(room)
+    if err != nil {
+        log.Fatalf("Error serializing updated room data: %v", err)
+        return
+    }
+
+    err = rdb.Set(ctx, "room:"+roomID, updatedRoomData, 0).Err()
+    if err != nil {
+        log.Fatalf("Failed to update room data in Redis: %v", err)
+    } else {
+        fmt.Printf("Admin for room %s updated successfully to %s (%s)\n", roomID, newAdminUsername, newAdminID)
+    }
 }
 
 func handleChangeProblem(data map[string]string) {
-	fmt.Println("Problem statement changed with data:", data)
+    fmt.Println("Problem statement changed with data:", data)
+
+    roomID := data["room"]
+    newProblemStatement := data["problemStatementPath"]
+
+    roomData, err := rdb.Get(ctx, "room:"+roomID).Result()
+    if err != nil {
+        log.Fatalf("Failed to retrieve room data for room %s: %v\n", roomID, err)
+        return
+    }
+
+    var room Room
+    err = json.Unmarshal([]byte(roomData), &room)
+    if err != nil {
+        log.Fatalf("Error deserializing room data: %v", err)
+        return
+    }
+
+    room.ProblemStatement = newProblemStatement
+
+    updatedRoomData, err := json.Marshal(room)
+    if err != nil {
+        log.Fatalf("Error serializing updated room data: %v", err)
+        return
+    }
+
+    err = rdb.Set(ctx, "room:"+roomID, updatedRoomData, 0).Err()
+    if err != nil {
+        log.Fatalf("Failed to update room data in Redis: %v", err)
+    } else {
+        fmt.Printf("Problem statement for room %s updated successfully to %s\n", roomID, newProblemStatement)
+    }
 }
