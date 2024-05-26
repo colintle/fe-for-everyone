@@ -13,8 +13,8 @@ import (
 var ctx = context.Background()
 var rdb *redis.Client
 var upgrader = websocket.Upgrader{
-    ReadBufferSize:  1024,
-    WriteBufferSize: 1024,
+    ReadBufferSize:  65536,
+    WriteBufferSize: 65536,
 }
 var (
     roomConnections = make(map[string][]*websocket.Conn)
