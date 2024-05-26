@@ -60,5 +60,13 @@ public class GlobalExceptionHandler {
             errorDetails.put("message", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDetails);
     }
+
+    @ExceptionHandler(RuntimeException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<Object> handleRuntimeException(SignatureException e){
+        Map<String, Object> errorDetails = new HashMap<>();
+            errorDetails.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDetails);
+    }
 }
 

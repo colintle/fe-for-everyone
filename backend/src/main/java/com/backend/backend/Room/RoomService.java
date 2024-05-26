@@ -6,7 +6,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -22,11 +24,14 @@ public class RoomService {
     private final UserRepository userRepository;
     private final RoomRepository roomRepository;
     private final MessagePublisher messagePublisher;
+    private final RedisTemplate<String, Object> redisTemplate;
 
-    public RoomService(UserRepository userRepository, RoomRepository roomRepository, MessagePublisher messagePublisher){
+
+    public RoomService(UserRepository userRepository, RoomRepository roomRepository, MessagePublisher messagePublisher, RedisTemplate<String, Object> redisTemplate){
         this.userRepository = userRepository;
         this.roomRepository = roomRepository;
         this.messagePublisher = messagePublisher;
+        this.redisTemplate = redisTemplate;
     }
 
     public User getUserDetails(Authentication authentication){
@@ -153,6 +158,11 @@ public class RoomService {
         response.put("message", "Room created successfully with admin privileges.");
 
         messagePublisher.publishCreateRoom(response);
+
+        if (!waitForRoomInRedis(newRoom.getRoomID().toString())) {
+            throw new RuntimeException("Timeout waiting for room to be set in Redis");
+        }
+
         return response;
     }
     
@@ -254,5 +264,22 @@ public class RoomService {
         messagePublisher.publishChangeProblem(response);
 
         return response;
+    }
+
+    private boolean waitForRoomInRedis(String roomID) {
+        String key = "room:" + roomID;
+        for (int i = 0; i < 30; i++) {  // Waits up to 30 seconds
+            Boolean exists = redisTemplate.hasKey(key);
+            if (Boolean.TRUE.equals(exists)) {
+                return true;
+            }
+            try {
+                TimeUnit.SECONDS.sleep(1); // Sleep for one second before checking again
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return false;
+            }
+        }
+        return false;
     }
 }

@@ -2,10 +2,11 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"encoding/json"
+	"sync"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/gorilla/websocket"
@@ -25,14 +26,25 @@ type Room struct {
 	Code string `json:"code"`
 }
 
+type WebSocketMessage struct {
+    Type    string `json:"type"`
+    Content string `json:"content"`
+    Data    interface{} `json:"data,omitempty"`  // Use interface{} to send any type of structured data
+}
+
 
 var ctx = context.Background()
-
 var rdb *redis.Client
 var upgrader = websocket.Upgrader{
     ReadBufferSize:  1024,
     WriteBufferSize: 1024,
 }
+var (
+    roomConnections = make(map[string][]*websocket.Conn)
+)
+
+var connMutex = &sync.Mutex{}
+
 
 func main() {
 	initializeRedis()
@@ -109,8 +121,8 @@ func handleMessage(channelName string, msg *redis.Message) {
 }
 
 func roomHandler(w http.ResponseWriter, r *http.Request) {
-    roomID := r.URL.Path[len("/ws/"):] // Extract room ID from URL
-    
+    roomID := r.URL.Path[len("/ws/"):]
+
     // Check if room exists in Redis
     exists, err := rdb.Exists(ctx, "room:"+roomID).Result()
     if err != nil {
@@ -129,6 +141,22 @@ func roomHandler(w http.ResponseWriter, r *http.Request) {
     }
     defer conn.Close()
 
+    connMutex.Lock()
+    roomConnections[roomID] = append(roomConnections[roomID], conn)
+    connMutex.Unlock()
+
+    defer func() {
+        connMutex.Lock()
+        connections := roomConnections[roomID]
+        for i, c := range connections {
+            if c == conn {
+                roomConnections[roomID] = append(connections[:i], connections[i+1:]...)
+                break
+            }
+        }
+        connMutex.Unlock()
+    }()
+
     fmt.Printf("Joined room: %s\n", roomID)
 
     for {
@@ -140,7 +168,6 @@ func roomHandler(w http.ResponseWriter, r *http.Request) {
         fmt.Printf("Received message in room %s: %s\n", roomID, string(message))
     }
 }
-
 
 func handleCreateRoom(data map[string]string) {
 	admin := User{
@@ -338,5 +365,30 @@ func handleChangeProblem(data map[string]string) {
         log.Fatalf("Failed to update room data in Redis: %v", err)
     } else {
         fmt.Printf("Problem statement for room %s updated successfully to %s\n", roomID, newProblemStatement)
+    }
+}
+
+func sendMessageToRoom(roomID string, messageType string, content string, data interface{}) {
+    msg := WebSocketMessage{
+        Type:    messageType,
+        Content: content,
+        Data:    data,
+    }
+
+    msgBytes, err := json.Marshal(msg)
+    if err != nil {
+        log.Printf("Failed to serialize message: %v", err)
+        return
+    }
+
+    connMutex.Lock()
+    connections := roomConnections[roomID]
+    connMutex.Unlock()
+
+    for _, conn := range connections {
+        if err := conn.WriteMessage(websocket.TextMessage, msgBytes); err != nil {
+            log.Printf("Error sending message to room %s: %v\n", roomID, err)
+            continue
+        }
     }
 }
