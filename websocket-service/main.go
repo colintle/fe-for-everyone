@@ -22,11 +22,10 @@ type Room struct {
 	RoomID string `json:"roomID"`
 	ProblemStatement string  `json:"problemStatement"`
 	RoomName string `json:"roomName"`
-	Users []User `json:"users"`
 	Code string `json:"code"`
 }
 
-type WebSocketMessage struct {
+type WebSocketResponse struct {
     Type    string `json:"type"`
     Content string `json:"content"`
     Data    interface{} `json:"data,omitempty"`
@@ -35,8 +34,15 @@ type WebSocketMessage struct {
 type RoomDetail struct {
     Content   string `json:"welcome"`
     Users     []User `json:"users"`
-    RoomInfo  string `json:"roomInfo"`
+    RoomInfo  Room `json:"roomInfo"`
 }
+
+type WebSocketMessage struct {
+    Type    string `json:"type"`
+    Content string `json:"content"`
+    RoomID  string `json:"roomID"`
+}
+
 
 
 var ctx = context.Background()
@@ -177,13 +183,25 @@ func roomHandler(w http.ResponseWriter, r *http.Request) {
     fmt.Printf("Joined room: %s\n", roomID)
 
     for {
-        _, message, err := conn.ReadMessage()
-        if err != nil {
-            fmt.Println("Error reading message:", err)
-            break
-        }
-        fmt.Printf("Received message in room %s: %s\n", roomID, string(message))
-    }
+		_, msgBytes, err := conn.ReadMessage()
+		if err != nil {
+			fmt.Println("Error reading message:", err)
+			break
+		}
+	
+		var message WebSocketMessage
+		if err := json.Unmarshal(msgBytes, &message); err != nil {
+			fmt.Println("Error parsing message:", err)
+			continue
+		}
+	
+		switch message.Type {
+		case "CodeChange":
+			handleCodeChange(message, conn, roomID)
+		default:
+			fmt.Printf("Unhandled message type %s in room %s\n", message.Type, roomID)
+		}
+	}
 }
 
 func fetchInitialRoomData(roomID string) (interface{}, error) {
@@ -212,7 +230,12 @@ func fetchInitialRoomData(roomID string) (interface{}, error) {
 
     roomInfo, err := rdb.Get(ctx, "room:"+roomID).Result()
     if err == nil {
-        roomDetail.RoomInfo = roomInfo
+		var room Room
+		if err := json.Unmarshal([]byte(roomInfo), &room); err != nil {
+            fmt.Printf("Error unmarshaling user data: %v", err)
+        }
+
+        roomDetail.RoomInfo = room
     }
 
     roomDetail.Content = fmt.Sprintf("Welcome to room %s", roomID)
@@ -232,7 +255,6 @@ func handleCreateRoom(data map[string]string) {
 		Admin:            admin,
 		RoomName:         data["roomName"],
 		Code:             "",
-		Users:            []User{admin},
 	}
 
 	exists, err := rdb.Exists(ctx, "room:"+room.RoomID).Result()
@@ -291,7 +313,7 @@ func closeRoomConnections(roomID string) {
     connections, exists := roomConnections[roomID]
     if exists {
         delete(roomConnections, roomID)
-        message := WebSocketMessage{
+        message := WebSocketResponse{
             Type:    "RoomDeleted",
             Content: "This room has been deleted.",
             Data:    nil,
@@ -358,7 +380,7 @@ func handleUserJoined(data map[string]string) {
     }
 
 	customMessage := fmt.Sprintf("User %s has joined!", username)
-    sendMessageToRoom(roomID, "UserJoined", customMessage, jsonData)
+    sendMessageToRoom(roomID, "UserJoined", customMessage, jsonData, nil)
 }
 
 func handleUserLeft(data map[string]string) {
@@ -387,7 +409,7 @@ func handleUserLeft(data map[string]string) {
     }
 
 	customMessage := fmt.Sprintf("User %s left!", username)
-    sendMessageToRoom(roomID, "UserLeft", customMessage, username)
+    sendMessageToRoom(roomID, "UserLeft", customMessage, username, nil)
 }
 
 func handleChangeAdmin(data map[string]string) {
@@ -429,7 +451,7 @@ func handleChangeAdmin(data map[string]string) {
     }
 
 	customMessage := fmt.Sprintf("User %s has become admin!", newAdminUsername)
-    sendMessageToRoom(roomID, "ChangeAdmin", customMessage, newAdminUsername)
+    sendMessageToRoom(roomID, "ChangeAdmin", customMessage, newAdminUsername, nil)
 }
 
 func handleChangeProblem(data map[string]string) {
@@ -466,11 +488,11 @@ func handleChangeProblem(data map[string]string) {
         fmt.Printf("Problem statement for room %s updated successfully to %s\n", roomID, newProblemStatement)
     }
 
-    sendMessageToRoom(roomID, "ChangeProblem", "Admin has changed the problem!", room.ProblemStatement)
+    sendMessageToRoom(roomID, "ChangeProblem", "Admin has changed the problem!", room.ProblemStatement, nil)
 }
 
-func sendMessageToRoom(roomID string, messageType string, content string, data interface{}) {
-    msg := WebSocketMessage{
+func sendMessageToRoom(roomID string, messageType string, content string, data interface{}, senderConn *websocket.Conn) {
+    msg := WebSocketResponse{
         Type:    messageType,
         Content: content,
         Data:    data,
@@ -487,9 +509,44 @@ func sendMessageToRoom(roomID string, messageType string, content string, data i
     connMutex.Unlock()
 
     for _, conn := range connections {
-        if err := conn.WriteMessage(websocket.TextMessage, msgBytes); err != nil {
-            log.Printf("Error sending message to room %s: %v\n", roomID, err)
-            continue
+        if conn != senderConn {
+            if err := conn.WriteMessage(websocket.TextMessage, msgBytes); err != nil {
+                log.Printf("Error sending message to room %s: %v\n", roomID, err)
+                continue
+            }
         }
     }
+}
+
+func handleCodeChange(message WebSocketMessage, conn *websocket.Conn, roomID string) {
+	roomData, err := rdb.Get(ctx, "room:"+roomID).Result()
+    if err != nil {
+        log.Fatalf("Failed to retrieve room data for room %s: %v\n", roomID, err)
+        return
+    }
+
+    var room Room
+    err = json.Unmarshal([]byte(roomData), &room)
+    if err != nil {
+        log.Fatalf("Error deserializing room data: %v", err)
+        return
+    }
+
+    room.Code = message.Content
+
+    updatedRoomData, err := json.Marshal(room)
+    if err != nil {
+        log.Fatalf("Error serializing updated room data: %v", err)
+        return
+    }
+
+    err = rdb.Set(ctx, "room:"+roomID, updatedRoomData, 0).Err()
+    if err != nil {
+        log.Fatalf("Failed to update room data in Redis: %v", err)
+        return
+    }
+
+    fmt.Printf("Code for room %s updated successfully\n", roomID)
+
+    sendMessageToRoom(roomID, "CodeChange", "Code updated!", room.Code, conn)
 }
