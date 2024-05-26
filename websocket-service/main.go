@@ -124,6 +124,8 @@ func roomHandler(w http.ResponseWriter, r *http.Request) {
     roomID := r.URL.Path[len("/ws/"):]
 
     // Check if room exists in Redis
+
+	// TODO: send all relavant data to the client the first time they make a connection
     exists, err := rdb.Exists(ctx, "room:"+roomID).Result()
     if err != nil {
         http.Error(w, "Internal server error", http.StatusInternalServerError)
@@ -209,14 +211,12 @@ func handleCreateRoom(data map[string]string) {
 func handleDeleteRoom(data map[string]string) {
     roomID := data["room"]
 
-    userSetKey := "roomUsers:" + roomID
-    _, err := rdb.Del(ctx, userSetKey).Result()
+    _, err := rdb.Del(ctx, "roomUsers:" + roomID).Result()
     if err != nil {
         log.Printf("Failed to delete user set for room %s from Redis: %v\n", roomID, err)
     }
 
-    roomKey := "room:" + roomID
-    result, err := rdb.Del(ctx, roomKey).Result()
+    result, err := rdb.Del(ctx, "room:" + roomID).Result()
     if err != nil {
         log.Printf("Failed to delete room %s from Redis: %v\n", roomID, err)
         return
@@ -283,8 +283,7 @@ func handleUserJoined(data map[string]string) {
 		log.Fatalf("Error serializing User data: %v", err)
 	}
 
-    userKey := "user:" + userID
-    err = rdb.Set(ctx, userKey, jsonData, 0).Err()
+    err = rdb.Set(ctx, "user:" + userID, jsonData, 0).Err()
     if err != nil {
         log.Fatalf("Failed to store user details for %s: %v\n", userID, err)
         return
@@ -300,6 +299,15 @@ func handleUserJoined(data map[string]string) {
     } else {
         fmt.Printf("User %s already a member of room %s\n", userID, roomID)
     }
+
+	users, err := rdb.SMembers(ctx, "roomUsers:"+roomID).Result()
+    if err != nil {
+        log.Fatalf("Failed to retrieve users for room %s: %v", roomID, err)
+        return
+    }
+
+	customMessage := fmt.Sprintf("User %s has joined!", username)
+    sendMessageToRoom(roomID, "UserJoined", customMessage, users)
 }
 
 func handleUserLeft(data map[string]string) {
@@ -307,6 +315,7 @@ func handleUserLeft(data map[string]string) {
 
     userID := data["userID"]
     roomID := data["room"]
+	username := data["user"]
 
     fmt.Printf("User %s is leaving room %s\n", userID, roomID)
 
@@ -325,6 +334,15 @@ func handleUserLeft(data map[string]string) {
     if err != nil {
         log.Printf("Failed to delete user data for %s: %v\n", userID, err)
     }
+
+	users, err := rdb.SMembers(ctx, "roomUsers:"+roomID).Result()
+    if err != nil {
+        log.Fatalf("Failed to retrieve users for room %s: %v", roomID, err)
+        return
+    }
+
+	customMessage := fmt.Sprintf("User %s left!", username)
+    sendMessageToRoom(roomID, "UserLeft", customMessage, users)
 }
 
 func handleChangeAdmin(data map[string]string) {
@@ -364,6 +382,9 @@ func handleChangeAdmin(data map[string]string) {
     } else {
         fmt.Printf("Admin for room %s updated successfully to %s (%s)\n", roomID, newAdminUsername, newAdminID)
     }
+
+	customMessage := fmt.Sprintf("User %s has become admin!", newAdminUsername)
+    sendMessageToRoom(roomID, "ChangeAdmin", customMessage, room.Admin)
 }
 
 func handleChangeProblem(data map[string]string) {
@@ -399,6 +420,8 @@ func handleChangeProblem(data map[string]string) {
     } else {
         fmt.Printf("Problem statement for room %s updated successfully to %s\n", roomID, newProblemStatement)
     }
+
+    sendMessageToRoom(roomID, "ChangeProblem", "Admin has changed the problem!", room.ProblemStatement)
 }
 
 func sendMessageToRoom(roomID string, messageType string, content string, data interface{}) {
