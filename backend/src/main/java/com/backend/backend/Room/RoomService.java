@@ -16,6 +16,9 @@ import org.springframework.stereotype.Service;
 import com.backend.backend.Redis.MessagePublisher;
 import com.backend.backend.User.User;
 import com.backend.backend.User.User.Role;
+
+import jakarta.validation.constraints.Null;
+
 import com.backend.backend.User.UserRepository;
 
 @Service
@@ -76,7 +79,7 @@ public class RoomService {
         roomRepository.deleteById(roomID);
     }
 
-    private void assignNewAdmin(Room room) {
+    private User assignNewAdmin(Room room) {
         List<User> potentialAdmins = userRepository.findByRoom(room);
         if (!potentialAdmins.isEmpty()) {
             Random rand = new Random();
@@ -86,7 +89,11 @@ public class RoomService {
 
             roomRepository.save(room);
             userRepository.save(newAdmin);
+
+            return newAdmin;
         }
+
+        return null;
     }
 
     public Map<String, Object> leaveRoom(Authentication authentication){
@@ -120,7 +127,16 @@ public class RoomService {
             messagePublisher.publishDeleteRoom(redisResponse);
         }
         else if (isAdmin){
-            assignNewAdmin(currentRoom);
+            User newAdmin = assignNewAdmin(currentRoom);
+            if (newAdmin != null){
+                Map<String, Object> adminResponse = new HashMap<>();
+                adminResponse.put("message", "Successfully changed admin");
+                adminResponse.put("admin", newAdmin.getUsername());
+                adminResponse.put("adminID", newAdmin.getId());
+                adminResponse.put("room", currentRoom.getRoomID());
+
+                messagePublisher.publishChangeAdmin(adminResponse);
+            }
         }
 
         messagePublisher.publishUserLeft(redisResponse);
@@ -261,20 +277,20 @@ public class RoomService {
         response.put("room", currentRoom.getRoomID());
         response.put("problemStatementPath", currentRoom.getProblemStatementPath());
 
-        messagePublisher.publishChangeProblem(response);
+        messagePublisher.publishChangeAdmin(response);
 
         return response;
     }
 
     private boolean waitForRoomInRedis(String roomID) {
         String key = "room:" + roomID;
-        for (int i = 0; i < 30; i++) {  // Waits up to 30 seconds
+        for (int i = 0; i < 30; i++) {
             Boolean exists = redisTemplate.hasKey(key);
             if (Boolean.TRUE.equals(exists)) {
                 return true;
             }
             try {
-                TimeUnit.SECONDS.sleep(1); // Sleep for one second before checking again
+                TimeUnit.SECONDS.sleep(1);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 return false;

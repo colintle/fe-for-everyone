@@ -207,10 +207,16 @@ func handleCreateRoom(data map[string]string) {
 }
 
 func handleDeleteRoom(data map[string]string) {
-	roomID := data["room"]
+    roomID := data["room"]
 
-	key := "room:" + roomID
-    result, err := rdb.Del(ctx, key).Result()
+    userSetKey := "roomUsers:" + roomID
+    _, err := rdb.Del(ctx, userSetKey).Result()
+    if err != nil {
+        log.Printf("Failed to delete user set for room %s from Redis: %v\n", roomID, err)
+    }
+
+    roomKey := "room:" + roomID
+    result, err := rdb.Del(ctx, roomKey).Result()
     if err != nil {
         log.Printf("Failed to delete room %s from Redis: %v\n", roomID, err)
         return
@@ -218,9 +224,36 @@ func handleDeleteRoom(data map[string]string) {
     if result == 0 {
         fmt.Printf("No room found with ID %s to delete\n", roomID)
     } else {
-        fmt.Printf("Room %s deleted successfully\n", roomID)
+        fmt.Printf("Room %s and associated user set deleted successfully\n", roomID)
+        closeRoomConnections(roomID)
     }
+}
 
+func closeRoomConnections(roomID string) {
+    connMutex.Lock()
+    connections, exists := roomConnections[roomID]
+    if exists {
+        delete(roomConnections, roomID)
+        message := WebSocketMessage{
+            Type:    "RoomDeleted",
+            Content: "This room has been deleted.",
+            Data:    nil,
+        }
+        messageBytes, err := json.Marshal(message)
+        if err != nil {
+            log.Printf("Error marshaling message: %v", err)
+            connMutex.Unlock()
+            return
+        }
+
+        for _, conn := range connections {
+            if err := conn.WriteMessage(websocket.TextMessage, messageBytes); err != nil {
+                log.Printf("Error sending delete notification: %v", err)
+            }
+            conn.Close()
+        }
+    }
+    connMutex.Unlock()
 }
 
 func handleUserJoined(data map[string]string) {
