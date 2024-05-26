@@ -29,7 +29,13 @@ type Room struct {
 type WebSocketMessage struct {
     Type    string `json:"type"`
     Content string `json:"content"`
-    Data    interface{} `json:"data,omitempty"`  // Use interface{} to send any type of structured data
+    Data    interface{} `json:"data,omitempty"`
+}
+
+type RoomDetail struct {
+    Content   string `json:"welcome"`
+    Users     []User `json:"users"`
+    RoomInfo  string `json:"roomInfo"`
 }
 
 
@@ -123,9 +129,6 @@ func handleMessage(channelName string, msg *redis.Message) {
 func roomHandler(w http.ResponseWriter, r *http.Request) {
     roomID := r.URL.Path[len("/ws/"):]
 
-    // Check if room exists in Redis
-
-	// TODO: send all relavant data to the client the first time they make a connection
     exists, err := rdb.Exists(ctx, "room:"+roomID).Result()
     if err != nil {
         http.Error(w, "Internal server error", http.StatusInternalServerError)
@@ -159,6 +162,18 @@ func roomHandler(w http.ResponseWriter, r *http.Request) {
         connMutex.Unlock()
     }()
 
+	initialData, err := fetchInitialRoomData(roomID)
+    if err != nil {
+        fmt.Println("Error fetching initial room data:", err)
+        return
+    }
+    jsonData, err := json.Marshal(initialData)
+    if err != nil {
+        fmt.Println("Error marshaling initial data:", err)
+        return
+    }
+    conn.WriteMessage(websocket.TextMessage, jsonData)
+
     fmt.Printf("Joined room: %s\n", roomID)
 
     for {
@@ -169,6 +184,40 @@ func roomHandler(w http.ResponseWriter, r *http.Request) {
         }
         fmt.Printf("Received message in room %s: %s\n", roomID, string(message))
     }
+}
+
+func fetchInitialRoomData(roomID string) (interface{}, error) {
+    var roomDetail RoomDetail
+
+    userIDs, err := rdb.SMembers(ctx, "roomUsers:"+roomID).Result()
+    if err != nil {
+        return nil, fmt.Errorf("failed to retrieve user IDs for room %s: %v", roomID, err)
+    }
+
+    for _, userID := range userIDs {
+        userData, err := rdb.Get(ctx, "user:"+userID).Result()
+        if err != nil {
+            fmt.Printf("Failed to retrieve data for user %s: %v", userID, err)
+            continue 
+        }
+
+        var user User
+        if err := json.Unmarshal([]byte(userData), &user); err != nil {
+            fmt.Printf("Error unmarshaling user data: %v", err)
+            continue
+        }
+
+        roomDetail.Users = append(roomDetail.Users, user)
+    }
+
+    roomInfo, err := rdb.Get(ctx, "room:"+roomID).Result()
+    if err == nil {
+        roomDetail.RoomInfo = roomInfo
+    }
+
+    roomDetail.Content = fmt.Sprintf("Welcome to room %s", roomID)
+
+    return roomDetail, nil
 }
 
 func handleCreateRoom(data map[string]string) {
@@ -204,6 +253,14 @@ func handleCreateRoom(data map[string]string) {
 	if err != nil {
 		log.Fatalf("Failed to save room data to Redis: %v", err)
 	}
+
+	userDetails := map[string]string{
+		"userID": data["adminID"],
+		"user": data["admin"],
+		"room": data["room"],
+	}
+
+	handleUserJoined(userDetails)
 
 	fmt.Println("Room data saved to Redis successfully")
 }
@@ -300,14 +357,8 @@ func handleUserJoined(data map[string]string) {
         fmt.Printf("User %s already a member of room %s\n", userID, roomID)
     }
 
-	users, err := rdb.SMembers(ctx, "roomUsers:"+roomID).Result()
-    if err != nil {
-        log.Fatalf("Failed to retrieve users for room %s: %v", roomID, err)
-        return
-    }
-
 	customMessage := fmt.Sprintf("User %s has joined!", username)
-    sendMessageToRoom(roomID, "UserJoined", customMessage, users)
+    sendMessageToRoom(roomID, "UserJoined", customMessage, jsonData)
 }
 
 func handleUserLeft(data map[string]string) {
@@ -335,14 +386,8 @@ func handleUserLeft(data map[string]string) {
         log.Printf("Failed to delete user data for %s: %v\n", userID, err)
     }
 
-	users, err := rdb.SMembers(ctx, "roomUsers:"+roomID).Result()
-    if err != nil {
-        log.Fatalf("Failed to retrieve users for room %s: %v", roomID, err)
-        return
-    }
-
 	customMessage := fmt.Sprintf("User %s left!", username)
-    sendMessageToRoom(roomID, "UserLeft", customMessage, users)
+    sendMessageToRoom(roomID, "UserLeft", customMessage, username)
 }
 
 func handleChangeAdmin(data map[string]string) {
@@ -384,7 +429,7 @@ func handleChangeAdmin(data map[string]string) {
     }
 
 	customMessage := fmt.Sprintf("User %s has become admin!", newAdminUsername)
-    sendMessageToRoom(roomID, "ChangeAdmin", customMessage, room.Admin)
+    sendMessageToRoom(roomID, "ChangeAdmin", customMessage, newAdminUsername)
 }
 
 func handleChangeProblem(data map[string]string) {
