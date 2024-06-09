@@ -23,7 +23,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Object> handleBadCredentialsException(BadCredentialsException e) {
         Map<String, Object> errorDetails = new HashMap<>();
         errorDetails.put("message", "Username and/or password does not meet the requirements.");
-
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorDetails);
     }
 
@@ -32,7 +31,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Object> handleIllegalArgumentException(IllegalArgumentException e) {
         Map<String, Object> errorDetails = new HashMap<>();
         errorDetails.put("message", e.getMessage());
-
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDetails);
     }
 
@@ -41,32 +39,32 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Object> handleSignatureException(SignatureException e) {
         Map<String, Object> errorDetails = new HashMap<>();
         errorDetails.put("message", "Either access token or refresh token is invalid");
-
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorDetails);
     }
 
     @ExceptionHandler(ExpiredJwtException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ResponseEntity<Object> handleExpiredJwtException(SignatureException e){
+    public ResponseEntity<Object> handleExpiredJwtException(ExpiredJwtException e){
         Map<String, Object> errorDetails = new HashMap<>();
-            errorDetails.put("message", "The token has expired. Please log in again.");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorDetails);
+        errorDetails.put("message", "The token has expired. Please log in again.");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorDetails);
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ResponseEntity<Object> handleEntityNotFoundException(SignatureException e){
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResponseEntity<Object> handleEntityNotFoundException(EntityNotFoundException e){
         Map<String, Object> errorDetails = new HashMap<>();
-            errorDetails.put("message", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDetails);
+        errorDetails.put("message", e.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorDetails);
     }
 
     @ExceptionHandler(RuntimeException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<Object> handleRuntimeException(SignatureException e){
+    public ResponseEntity<Object> handleRuntimeException(RuntimeException e){
         Map<String, Object> errorDetails = new HashMap<>();
-            errorDetails.put("message", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDetails);
+        errorDetails.put("message", e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDetails);
     }
 }
+
 

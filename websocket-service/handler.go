@@ -157,7 +157,7 @@ func handleUserJoined(data map[string]string) {
     }
 
 	customMessage := fmt.Sprintf("User %s has joined!", username)
-    sendMessageToRoom(roomID, "UserJoined", customMessage, jsonData, nil)
+    sendMessageToRoom(roomID, "UserJoined", customMessage, username, nil)
 }
 
 func handleUserLeft(data map[string]string) {

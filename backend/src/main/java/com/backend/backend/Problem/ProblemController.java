@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 
 @RestController
@@ -31,7 +30,7 @@ public class ProblemController {
     }
 
     @GetMapping("/")
-    public ResponseEntity<Object> getMethodName(Authentication authentication) {
+    public ResponseEntity<Object> allProblems(Authentication authentication) {
         return ResponseEntity.status(HttpStatus.OK).body(problemService.completedProblems(authentication));
     }
     

@@ -60,7 +60,6 @@ public class RoomService {
         return response;
     }
 
-
     public boolean ifJoinedRoom(Authentication authentication){
         Map<String, Object> joinedRoomDetails = getJoinedRoom(authentication);
 
@@ -116,9 +115,9 @@ public class RoomService {
         currentRoom.decrementUserCount();
         roomRepository.save(currentRoom);
 
-        redisResponse.put("userID", userDetails.getId());
+        redisResponse.put("userID", userDetails.getId().toString());
         redisResponse.put("user", userDetails.getUsername());
-        redisResponse.put("room", currentRoom.getRoomID());
+        redisResponse.put("room", currentRoom.getRoomID().toString());
 
         if (currentRoom.getUserCount() == 0){
             deleteRoom(currentRoom.getRoomID());
@@ -130,8 +129,8 @@ public class RoomService {
                 Map<String, Object> adminResponse = new HashMap<>();
                 adminResponse.put("message", "Successfully changed admin");
                 adminResponse.put("admin", newAdmin.getUsername());
-                adminResponse.put("adminID", newAdmin.getId());
-                adminResponse.put("room", currentRoom.getRoomID());
+                adminResponse.put("adminID", newAdmin.getId().toString());
+                adminResponse.put("room", currentRoom.getRoomID().toString());
 
                 messagePublisher.publishChangeAdmin(adminResponse);
             }
@@ -158,24 +157,25 @@ public class RoomService {
 
         roomRepository.save(newRoom);
     
-        user.setRole(Role.ADMIN);
-        user.setRoom(newRoom);
-            
-        userRepository.save(user);
-    
         Map<String, Object> response = new HashMap<>();
-        response.put("room", newRoom.getRoomID());
+        response.put("room", newRoom.getRoomID().toString());
         response.put("roomName", newRoom.getRoomName());
         response.put("problemStatementPath", newRoom.getProblemStatementPath());
         response.put("admin", newRoom.getAdmin().getUsername());
-        response.put("adminID", newRoom.getAdmin().getId());
+        response.put("adminID", newRoom.getAdmin().getId().toString());
         response.put("message", "Room created successfully with admin privileges.");
 
         messagePublisher.publishCreateRoom(response);
 
         if (!waitForRoomInRedis(newRoom.getRoomID().toString())) {
+            deleteRoom(newRoom.getRoomID());
             throw new RuntimeException("Timeout waiting for room to be set in Redis");
         }
+
+        user.setRole(Role.ADMIN);
+        user.setRoom(newRoom);
+            
+        userRepository.save(user);
 
         return response;
     }
@@ -207,9 +207,9 @@ public class RoomService {
             response.put("message", "Room successfully joined.");
 
             Map<String, Object> redisResponse = new HashMap<>();
-            redisResponse.put("userID", user.getId());
+            redisResponse.put("userID", user.getId().toString());
             redisResponse.put("user", user.getUsername());
-            redisResponse.put("room", room.getRoomID());
+            redisResponse.put("room", room.getRoomID().toString());
 
             messagePublisher.publishUserJoined(redisResponse);
             return response;
@@ -234,7 +234,7 @@ public class RoomService {
         Map<String, Object> response = new HashMap<>();
         response.put("problemStatementPath", requestBody.getProblemStatementPath());
         response.put("message", "Successfully changed the problem.");
-        response.put("room", currentRoom.getRoomID());
+        response.put("room", currentRoom.getRoomID().toString());
 
         messagePublisher.publishChangeProblem(response);
 
@@ -271,8 +271,8 @@ public class RoomService {
         Map<String, Object> response = new HashMap<>();
         response.put("message", "Successfully changed admin");
         response.put("admin", currentRoom.getAdmin().getUsername());
-        response.put("adminID", currentRoom.getAdmin().getId());
-        response.put("room", currentRoom.getRoomID());
+        response.put("adminID", currentRoom.getAdmin().getId().toString());
+        response.put("room", currentRoom.getRoomID().toString());
         response.put("problemStatementPath", currentRoom.getProblemStatementPath());
 
         messagePublisher.publishChangeAdmin(response);
