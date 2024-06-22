@@ -51,6 +51,7 @@ func handleCreateRoom(data map[string]string) {
 	admin := User{
 		UserID:   data["adminID"],
 		Username: data["admin"],
+        RoomID: data["room"],
 	}
 
 	room := Room{
@@ -213,6 +214,7 @@ func handleChangeAdmin(data map[string]string) {
     room.Admin = User{
         UserID: newAdminID,
         Username: newAdminUsername,
+        RoomID: roomID,
     }
 
     updatedRoomData, err := json.Marshal(room)
