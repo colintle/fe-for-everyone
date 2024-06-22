@@ -26,6 +26,7 @@ services:
       - ./backend/:/app
     command: ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:${DEBUG_PORT_ON_CONTAINER}"
   websocket-service:
+    env_file: .env
     platform: linux/amd64
     build: ./websocket-service
     ports:

@@ -132,6 +132,7 @@ func handleUserJoined(data map[string]string) {
 	user := User{
 		UserID: userID,
 		Username: username,
+        RoomID: roomID,
 	}
 
 	jsonData, err := json.Marshal(user)

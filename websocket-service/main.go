@@ -26,7 +26,7 @@ func main() {
 
 	subscribeToRedis()
 
-	http.HandleFunc("/ws/", roomHandler)
+	http.HandleFunc("/ws", roomHandler)
 	log.Println("WebSocket service starting on :8081...")
 	if err := http.ListenAndServe(":8081", nil); err != nil {
 		log.Fatal("ListenAndServe: ", err)
