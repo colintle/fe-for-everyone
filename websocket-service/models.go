@@ -14,16 +14,16 @@ type Room struct {
 	Code string `json:"code"`
 }
 
-type WebSocketResponse struct {
-    Type    string `json:"type"`
-    Content string `json:"content"`
-    Data    interface{} `json:"data,omitempty"`
-}
-
 type RoomDetail struct {
     Content   string `json:"welcome"`
     Users     []User `json:"users"`
     RoomInfo  Room `json:"roomInfo"`
+}
+
+type WebSocketResponse struct {
+    Type    string `json:"type"`
+    Content string `json:"content"`
+    Data    interface{} `json:"data,omitempty"`
 }
 
 type WebSocketMessage struct {

@@ -303,3 +303,7 @@ func handleCodeChange(message WebSocketMessage, conn *websocket.Conn, roomID str
 
     sendMessageToRoom(roomID, "CodeChange", "Code updated!", room.Code, conn)
 }
+
+func handleCursorChange(message string, conn *websocket.Conn, roomID string){
+    sendMessageToRoom(roomID, "CursorChange", "One cursor has been updated!", message, conn)
+}

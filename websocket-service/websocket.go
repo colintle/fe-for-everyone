@@ -187,6 +187,8 @@ func handleMessages(roomID string, conn *websocket.Conn) {
         switch message.Type {
         case "CodeChange":
             handleCodeChange(message, conn, roomID)
+		case "CursorChange":
+			handleCursorChange(message.Content, conn, roomID)
         default:
             fmt.Printf("Unhandled message type %s in room %s\n", message.Type, roomID)
         }
