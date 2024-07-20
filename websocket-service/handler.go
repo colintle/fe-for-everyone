@@ -8,14 +8,17 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+// fetchInitialRoomData retrieves the initial room data and user details from Redis
 func fetchInitialRoomData(roomID string) (interface{}, error) {
     var roomDetail RoomDetail
 
+    // Get the user IDs in the room
     userIDs, err := rdb.SMembers(ctx, "roomUsers:"+roomID).Result()
     if err != nil {
         return nil, fmt.Errorf("failed to retrieve user IDs for room %s: %v", roomID, err)
     }
 
+    // Retrieve each user's details and add to roomDetail
     for _, userID := range userIDs {
         userData, err := rdb.Get(ctx, "user:"+userID).Result()
         if err != nil {
@@ -32,6 +35,7 @@ func fetchInitialRoomData(roomID string) (interface{}, error) {
         roomDetail.Users = append(roomDetail.Users, user)
     }
 
+    // Retrieve room info
     roomInfo, err := rdb.Get(ctx, "room:"+roomID).Result()
     if err == nil {
 		var room Room
@@ -42,11 +46,13 @@ func fetchInitialRoomData(roomID string) (interface{}, error) {
         roomDetail.RoomInfo = room
     }
 
+    // Add welcome message to roomDetail
     roomDetail.Content = fmt.Sprintf("Welcome to room %s", roomID)
 
     return roomDetail, nil
 }
 
+// handleCreateRoom handles the creation of a new room and updates Redis accordingly
 func handleCreateRoom(data map[string]string) {
 	admin := User{
 		UserID:   data["adminID"],
@@ -62,6 +68,7 @@ func handleCreateRoom(data map[string]string) {
 		Code:             "",
 	}
 
+    // Check if room already exists
 	exists, err := rdb.Exists(ctx, "room:"+room.RoomID).Result()
 	if err != nil {
 		log.Fatalf("Failed to check if room exists: %v", err)
@@ -71,6 +78,7 @@ func handleCreateRoom(data map[string]string) {
 		return
 	}
 
+    // Save room data to Redis
 	jsonData, err := json.Marshal(room)
 	if err != nil {
 		log.Fatalf("Error serializing Room data: %v", err)
@@ -81,6 +89,7 @@ func handleCreateRoom(data map[string]string) {
 		log.Fatalf("Failed to save room data to Redis: %v", err)
 	}
 
+    // Add admin user to the room
 	userDetails := map[string]string{
 		"userID": data["adminID"],
 		"user": data["admin"],
@@ -92,14 +101,17 @@ func handleCreateRoom(data map[string]string) {
 	fmt.Println("Room data saved to Redis successfully")
 }
 
+// handleDeleteRoom handles the deletion of a room and its associated data in Redis
 func handleDeleteRoom(data map[string]string) {
     roomID := data["room"]
 
+    // Delete all users in the room
     _, err := rdb.Del(ctx, "roomUsers:" + roomID).Result()
     if err != nil {
         log.Printf("Failed to delete user set for room %s from Redis: %v\n", roomID, err)
     }
 
+    // Delete the room itself
     result, err := rdb.Del(ctx, "room:" + roomID).Result()
     if err != nil {
         log.Printf("Failed to delete room %s from Redis: %v\n", roomID, err)
@@ -113,6 +125,7 @@ func handleDeleteRoom(data map[string]string) {
     }
 }
 
+// handleUserJoined handles adding a user to a room and updates Redis accordingly
 func handleUserJoined(data map[string]string) {
     fmt.Println("User joined with data:", data)
 
@@ -120,6 +133,7 @@ func handleUserJoined(data map[string]string) {
     username := data["user"]
     roomID := data["room"]
 
+    // Check if the room exists
     exists, err := rdb.Exists(ctx, "room:"+roomID).Result()
     if err != nil {
         log.Fatalf("Failed to check if room exists: %v", err)
@@ -130,6 +144,7 @@ func handleUserJoined(data map[string]string) {
         return
     }
 
+    // Create user object and save to Redis
 	user := User{
 		UserID: userID,
 		Username: username,
@@ -147,6 +162,7 @@ func handleUserJoined(data map[string]string) {
         return
     }
 
+    // Add user to the room's user set
     added, err := rdb.SAdd(ctx, "roomUsers:"+roomID, userID).Result()
     if err != nil {
         log.Fatalf("Failed to add user %s to room %s: %v\n", userID, roomID, err)
@@ -158,10 +174,12 @@ func handleUserJoined(data map[string]string) {
         fmt.Printf("User %s already a member of room %s\n", userID, roomID)
     }
 
+    // Notify other users in the room
 	customMessage := fmt.Sprintf("User %s has joined!", username)
     sendMessageToRoom(roomID, "UserJoined", customMessage, username, nil)
 }
 
+// handleUserLeft handles removing a user from a room and updates Redis accordingly
 func handleUserLeft(data map[string]string) {
     fmt.Println("User left with data:", data)
 
@@ -171,6 +189,7 @@ func handleUserLeft(data map[string]string) {
 
     fmt.Printf("User %s is leaving room %s\n", userID, roomID)
 
+    // Remove user from the room's user set
     removed, err := rdb.SRem(ctx, "roomUsers:"+roomID, userID).Result()
     if err != nil {
         log.Fatalf("Failed to remove user %s from room %s: %v\n", userID, roomID, err)
@@ -182,15 +201,18 @@ func handleUserLeft(data map[string]string) {
         fmt.Printf("User %s was not in room %s\n", userID, roomID)
     }
 
+    // Delete user data from Redis
     _, err = rdb.Del(ctx, "user:"+userID).Result()
     if err != nil {
         log.Printf("Failed to delete user data for %s: %v\n", userID, err)
     }
 
+    // Notify other users in the room
 	customMessage := fmt.Sprintf("User %s left!", username)
     sendMessageToRoom(roomID, "UserLeft", customMessage, username, nil)
 }
 
+// handleChangeAdmin handles changing the admin of a room and updates Redis accordingly
 func handleChangeAdmin(data map[string]string) {
     fmt.Println("Admin changed with data:", data)
 
@@ -198,12 +220,14 @@ func handleChangeAdmin(data map[string]string) {
     newAdminID := data["adminID"]
     newAdminUsername := data["admin"]
 
+    // Retrieve current room data
     roomData, err := rdb.Get(ctx, "room:"+roomID).Result()
     if err != nil {
         log.Fatalf("Failed to retrieve room data for room %s: %v\n", roomID, err)
         return
     }
 
+    // Unmarshal room data
     var room Room
     err = json.Unmarshal([]byte(roomData), &room)
     if err != nil {
@@ -211,12 +235,14 @@ func handleChangeAdmin(data map[string]string) {
         return
     }
 
+    // Update admin information
     room.Admin = User{
         UserID: newAdminID,
         Username: newAdminUsername,
         RoomID: roomID,
     }
 
+    // Save updated room data to Redis
     updatedRoomData, err := json.Marshal(room)
     if err != nil {
         log.Fatalf("Error serializing updated room data: %v", err)
@@ -230,22 +256,26 @@ func handleChangeAdmin(data map[string]string) {
         fmt.Printf("Admin for room %s updated successfully to %s (%s)\n", roomID, newAdminUsername, newAdminID)
     }
 
+    // Notify other users in the room
 	customMessage := fmt.Sprintf("User %s has become admin!", newAdminUsername)
     sendMessageToRoom(roomID, "ChangeAdmin", customMessage, newAdminUsername, nil)
 }
 
+// handleChangeProblem handles changing the problem statement of a room and updates Redis accordingly
 func handleChangeProblem(data map[string]string) {
     fmt.Println("Problem statement changed with data:", data)
 
     roomID := data["room"]
     newProblemStatement := data["problemStatementPath"]
 
+    // Retrieve current room data
     roomData, err := rdb.Get(ctx, "room:"+roomID).Result()
     if err != nil {
         log.Fatalf("Failed to retrieve room data for room %s: %v\n", roomID, err)
         return
     }
 
+    // Unmarshal room data
     var room Room
     err = json.Unmarshal([]byte(roomData), &room)
     if err != nil {
@@ -253,8 +283,10 @@ func handleChangeProblem(data map[string]string) {
         return
     }
 
+    // Update problem statement
     room.ProblemStatement = newProblemStatement
 
+    // Save updated room data to Redis
     updatedRoomData, err := json.Marshal(room)
     if err != nil {
         log.Fatalf("Error serializing updated room data: %v", err)
@@ -268,16 +300,20 @@ func handleChangeProblem(data map[string]string) {
         fmt.Printf("Problem statement for room %s updated successfully to %s\n", roomID, newProblemStatement)
     }
 
+    // Notify other users in the room
     sendMessageToRoom(roomID, "ChangeProblem", "Admin has changed the problem!", room.ProblemStatement, nil)
 }
 
+// handleCodeChange handles updating the code content in a room and updates Redis accordingly
 func handleCodeChange(message WebSocketMessage, conn *websocket.Conn, roomID string) {
+    // Retrieve current room data
 	roomData, err := rdb.Get(ctx, "room:"+roomID).Result()
     if err != nil {
         log.Fatalf("Failed to retrieve room data for room %s: %v\n", roomID, err)
         return
     }
 
+    // Unmarshal room data
     var room Room
     err = json.Unmarshal([]byte(roomData), &room)
     if err != nil {
@@ -285,8 +321,11 @@ func handleCodeChange(message WebSocketMessage, conn *websocket.Conn, roomID str
         return
     }
 
-    room.Code = message.Content
+    // Update code content
+    codeContent := message.Content.(string)
+    room.Code = codeContent
 
+    // Save updated room data to Redis
     updatedRoomData, err := json.Marshal(room)
     if err != nil {
         log.Fatalf("Error serializing updated room data: %v", err)
@@ -301,9 +340,11 @@ func handleCodeChange(message WebSocketMessage, conn *websocket.Conn, roomID str
 
     fmt.Printf("Code for room %s updated successfully\n", roomID)
 
+    // Notify other users in the room
     sendMessageToRoom(roomID, "CodeChange", "Code updated!", room.Code, conn)
 }
 
-func handleCursorChange(message string, conn *websocket.Conn, roomID string){
+// handleCursorChange handles updating the cursor position in a room and notifies other users
+func handleCursorChange(message interface{}, conn *websocket.Conn, roomID string){
     sendMessageToRoom(roomID, "CursorChange", "One cursor has been updated!", message, conn)
 }
