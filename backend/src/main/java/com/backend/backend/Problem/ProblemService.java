@@ -1,5 +1,6 @@
 package com.backend.backend.Problem;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +33,7 @@ public class ProblemService {
     public Map<String,Object> completeProblem(Problem request, Authentication authentication){
         User user = getUserDetails(authentication);
 
-        if (request.getProblemStatementPath().isEmpty()){
+        if (request.getProblemStatementPath().isEmpty() ){
             throw new IllegalArgumentException("One of the required fields is empty.");
         }
 
@@ -46,6 +47,7 @@ public class ProblemService {
         Problem newProblem = new Problem();
         newProblem.setUser(user);
         newProblem.setProblemStatementPath(problemStatementPath);
+        newProblem.setDate(LocalDate.now());
 
         problemRepository.save(newProblem);
 

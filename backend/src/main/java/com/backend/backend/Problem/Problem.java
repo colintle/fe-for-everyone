@@ -1,6 +1,9 @@
 package com.backend.backend.Problem;
 
 import jakarta.persistence.*;
+
+import java.time.LocalDate;
+
 import com.backend.backend.User.User;
 
 @Entity
@@ -15,6 +18,9 @@ public class Problem {
 
     @Column(name = "problemStatementPath", nullable = false)
     private String problemStatementPath;
+
+    @Column(name = "date", nullable = false)
+    private LocalDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userID", nullable = false, referencedColumnName = "userID")
@@ -42,5 +48,13 @@ public class Problem {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
     }
 }
