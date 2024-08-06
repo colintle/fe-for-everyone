@@ -83,16 +83,16 @@ public class ProblemService {
         return user.orElse(null);
     }
 
-    public Map<String, List<String>> completedProblems(Authentication authentication){
+    public Map<String, List<ProblemDTO>> completedProblems(Authentication authentication) {
         User user = getUserDetails(authentication);
         user = getUserWithProblems(user.getId());
-        
-        List<String> problemPaths = user.getProblems().stream()
-            .map(Problem::getProblemStatementPath)
+
+        List<ProblemDTO> problems = user.getProblems().stream()
+            .map(problem -> new ProblemDTO(problem.getProblemStatementPath(), problem.getDate()))
             .collect(Collectors.toList());
 
-        Map<String, List<String>> response = new HashMap<>();
-        response.put("problems", problemPaths);
+        Map<String, List<ProblemDTO>> response = new HashMap<>();
+        response.put("problems", problems);
 
         return response;
     }
