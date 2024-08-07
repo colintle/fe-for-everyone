@@ -63,7 +63,7 @@ public class JWTController {
     }
 
     @GetMapping("/refresh")
-    public ResponseEntity<Object> refresh(HttpServletRequest request, HttpServletResponse response) throws SignatureException {
+    public ResponseEntity<Object> refresh(HttpServletRequest request, HttpServletResponse response) {
         ConsumptionProbe probe = this.bucket.tryConsumeAndReturnRemaining(1);
         if (!probe.isConsumed()) {
             Map<String, Object> body = new HashMap<>();

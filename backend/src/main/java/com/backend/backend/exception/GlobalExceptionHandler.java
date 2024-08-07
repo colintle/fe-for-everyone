@@ -38,7 +38,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ResponseEntity<Object> handleSignatureException(SignatureException e) {
         Map<String, Object> errorDetails = new HashMap<>();
-        errorDetails.put("message", "Either refresh token is invalid");
+        errorDetails.put("message", "Refresh token is invalid");
         errorDetails.put("logout", true);
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorDetails);
     }

@@ -15,6 +15,7 @@ import com.backend.backend.JWT.JWT;
 import com.backend.backend.JWT.JWTService;
 import com.backend.backend.JWT.PasswordConstraintValidator;
 
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -47,8 +48,11 @@ public class UserService {
 
         User user = userRepository.findUserByUsername(request.getUsername()).orElseThrow();
         String token = jwtService.generateToken(user, 24*60*60*1000, false);
-        String refreshToken = jwtService.generateToken(user, 7*24*60*60*1000, true);
+        // String refreshToken = jwtService.generateToken(user, 7*24*60*60*1000, true);
+        String refreshToken = jwtService.generateToken(user, 1000, true);
+        // CookieUtils.create(response, "refreshToken", refreshToken, true, 86400 * 7); // 7 days and secure
         CookieUtils.create(response, "refreshToken", refreshToken, true, 86400 * 7); // 7 days and secure
+
 
         return new JWT(token, user.getUsername());
     }
@@ -91,16 +95,20 @@ public class UserService {
     public JWT refresh(HttpServletRequest request ,HttpServletResponse response){
         String refreshToken = CookieUtils.getCookieValue(request, "refreshToken");
 
+        if (refreshToken == null){
+            throw new SignatureException("");
+        }
+
         String username = jwtService.extractUsername(refreshToken, true);
 
         if (username == null){
-            throw new IllegalArgumentException("Access token and/or refresh token is invalid.");
+            throw new SignatureException("");
         }
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
         if (!jwtService.isValid(refreshToken, userDetails, true)) {
-            throw new IllegalArgumentException("Access token and/or refresh token is invalid.");
+            throw new SignatureException("");
         }
 
         User user = userRepository.findUserByUsername(username).orElseThrow();
