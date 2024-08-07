@@ -8,6 +8,7 @@ import Navbar from './components/Navbar';
 import Home from "./components/menu/Home";
 import History from "./components/history/History";
 import MultiLanding from "./components/multi/MultiLanding";
+import Problems from "./components/problems/Problems";
 
 function App() {
   const isMobile = window.matchMedia("only screen and (max-width: 1024px)").matches;
@@ -24,6 +25,10 @@ function App() {
     {
       path: "/history",
       element: <History/>
+    },
+    {
+      path: "/problems",
+      element: <Problems/>
     },
     {
       path: "/collab",
