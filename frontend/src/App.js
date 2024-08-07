@@ -4,6 +4,7 @@ import {
 } from "react-router-dom";
 
 import Navbar from './components/Navbar';
+import Loading from './components/Loading';
 
 function App() {
   const isMobile = window.matchMedia("only screen and (max-width: 1024px)").matches;
