@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const Navbar = () => {
-  const [activeLink, setActiveLink] = useState('Home');
+  const [activeLink, setActiveLink] = useState('/');
 
   const switchPage = (page) => {
     setActiveLink(page)
@@ -18,42 +19,48 @@ const Navbar = () => {
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               {/* Navbar items */}
-              <button
-                onClick={() => switchPage('Home')}
+              <Link
+                to={"/"}
+                onClick={() => switchPage('/')}
                 className={`${
-                  activeLink === 'Home'
+                  activeLink === '/'
                     ? 'border-blue-500 text-blue-500'
                     : 'border-transparent text-gray-500 hover:text-gray-700'
                 } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
               >
                 Home
-              </button>
-              <button
-                onClick={() => switchPage('Problems')}
+              </Link>
+              <Link
+                to={"/problems"}
+                onClick={() => switchPage('/problems')}
                 className={`${
-                  activeLink === 'Problems'
+                  activeLink === '/problems'
                     ? 'border-blue-500 text-blue-500'
                     : 'border-transparent text-gray-500 hover:text-gray-700'
                 } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
               >
                 Problems
-              </button>
-              <button
-                onClick={() => switchPage('History')}
+              </Link>
+              <Link
+                to={"/history"}
+                onClick={() => switchPage('/history')}
                 className={`${
-                  activeLink === 'History'
+                  activeLink === '/history'
                     ? 'border-blue-500 text-blue-500'
                     : 'border-transparent text-gray-500 hover:text-gray-700'
                 } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
               >
                 History
-              </button>
+              </Link>
             </div>
           </div>
           <div className="flex items-center">
-            <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 hover:font-bold">
+            <Link 
+              to={"/collab"}
+              onClick={() => switchPage("/collab")}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 hover:font-bold">
               Join a Break Room
-            </button>
+            </Link>
           </div>
         </div>
       </div>
