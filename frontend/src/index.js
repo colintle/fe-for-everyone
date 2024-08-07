@@ -7,7 +7,6 @@ import "./index.css";
 import Home from "./components/menu/Home";
 import History from "./components/history/History";
 import MultiLanding from "./components/multi/MultiLanding";
-import Problems from "./components/problems/Problems";
 
 const EmptyPage = () => {
     return (
@@ -35,10 +34,6 @@ const router = createBrowserRouter([
         {
           path: "/history",
           element: <History/>
-        },
-        {
-          path: "/problems",
-          element: <Problems/>
         },
         {
           path: "/collab",

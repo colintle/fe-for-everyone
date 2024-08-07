@@ -31,17 +31,6 @@ const Navbar = () => {
                 Home
               </Link>
               <Link
-                to={"/problems"}
-                onClick={() => switchPage('/problems')}
-                className={`${
-                  activeLink === '/problems'
-                    ? 'border-blue-500 text-blue-500'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
-                } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
-              >
-                Problems
-              </Link>
-              <Link
                 to={"/history"}
                 onClick={() => switchPage('/history')}
                 className={`${
@@ -52,6 +41,17 @@ const Navbar = () => {
               >
                 History
               </Link>
+              <a
+                href={"https://www.cs.ucf.edu/registration/exm/"}
+                target='_blank'
+                className={`${
+                  activeLink === '/problems'
+                    ? 'border-blue-500 text-blue-500'
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
+              >
+                Problems
+              </a>
             </div>
           </div>
           <div className="flex items-center">
