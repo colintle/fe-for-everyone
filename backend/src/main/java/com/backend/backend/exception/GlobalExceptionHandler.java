@@ -38,7 +38,8 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ResponseEntity<Object> handleSignatureException(SignatureException e) {
         Map<String, Object> errorDetails = new HashMap<>();
-        errorDetails.put("message", "Either access token or refresh token is invalid");
+        errorDetails.put("message", "Either refresh token is invalid");
+        errorDetails.put("logout", true);
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorDetails);
     }
 
@@ -47,6 +48,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Object> handleExpiredJwtException(ExpiredJwtException e){
         Map<String, Object> errorDetails = new HashMap<>();
         errorDetails.put("message", "The token has expired. Please log in again.");
+        errorDetails.put("expired", true);
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorDetails);
     }
 

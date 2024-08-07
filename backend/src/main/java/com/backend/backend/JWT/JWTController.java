@@ -35,12 +35,12 @@ public class JWTController {
         this.bucket = rateLimitService.createBucket();
     }
 
-     @DeleteMapping("/signout")
+    @DeleteMapping("/signout")
      public ResponseEntity<Object> signout(HttpServletResponse response) {    
         return ResponseEntity.status(HttpStatus.OK).body(userService.logout(response));
      }
 
-     @PostMapping("/register")
+    @PostMapping("/register")
     public ResponseEntity<Object> register(@RequestBody User request, HttpServletResponse response) {
         ConsumptionProbe probe = this.bucket.tryConsumeAndReturnRemaining(1);
         if (!probe.isConsumed()) {
