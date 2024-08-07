@@ -44,6 +44,7 @@ const Navbar = () => {
               <a
                 href={"https://www.cs.ucf.edu/registration/exm/"}
                 target='_blank'
+                rel="noopener noreferrer"
                 className={`${
                   activeLink === '/problems'
                     ? 'border-blue-500 text-blue-500'
