@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 const Navbar = () => {
-  const [activeLink, setActiveLink] = useState('/');
+  const location = useLocation()
+  const [activeLink, setActiveLink] = useState(location.pathname);
 
   const switchPage = (page) => {
     setActiveLink(page)
