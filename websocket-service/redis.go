@@ -58,6 +58,7 @@ func subscribeToChannel(channelName string) {
 }
 
 func publishMessageToChannel(channel string, message map[string]string) {
+	message["instanceID"] = instanceID // Add the instance ID to the message
 	msgBytes, err := json.Marshal(message)
 	if err != nil {
 		log.Printf("Error marshaling message for channel %s: %v", channel, err)

@@ -25,6 +25,11 @@ func handleSubscribers(channelName string, msg *redis.Message) {
 		return
 	}
 
+	// Check if the message was sent by this instance
+	if currInstanceID, ok := messageData["instanceID"]; ok && instanceID == currInstanceID {
+		return // Ignore the message if it was sent by this instance
+	}
+
 	// Call the appropriate handler function based on the channel name
 	switch channelName {
 	case "create_room":

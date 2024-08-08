@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/gorilla/websocket"
+	"github.com/google/uuid"
 )
 
 // Context for Redis operations
@@ -26,6 +27,9 @@ var upgrader = websocket.Upgrader{
 var (
     roomConnections = make(map[string][]*websocket.Conn)
 )
+
+// Generate a unique instance ID
+var instanceID = uuid.New().String()
 
 // Mutex for synchronizing access to roomConnections map
 var connMutex = &sync.Mutex{}
