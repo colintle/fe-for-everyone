@@ -17,7 +17,7 @@ function Form() {
               className="text-blue-500 hover:underline"
               onClick={() => setSignUp(false)}
             >
-              Log in
+              Login
             </button>
           </p>
         ) : (
@@ -27,7 +27,7 @@ function Form() {
               className="text-blue-500 hover:underline"
               onClick={() => setSignUp(true)}
             >
-              Sign up
+              Sign Up
             </button>
           </p>
         )}
