@@ -382,3 +382,23 @@ func handleCursorChangeFromChannel(data map[string]string) {
 
 	sendMessageToRoom(roomID, "CursorChange", "Cursor position updated!", cursorData, nil)
 }
+
+func handleRemoveConnection(data map[string]string) {
+    userID := data["userID"]
+    roomID := data["roomID"]
+    connID := data["connID"]
+
+    // Remove the connection from the in-memory map
+    connMutex.Lock()
+    defer connMutex.Unlock()
+    connections := roomConnections[roomID]
+    for i, c := range connections {
+        if c.RemoteAddr().String() == connID {
+            roomConnections[roomID] = append(connections[:i], connections[i+1:]...)
+            break
+        }
+    }
+
+    // Remove the connection ID from Redis (if necessary)
+    rdb.HDel(ctx, "userConnections", userID)
+}

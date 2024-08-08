@@ -48,6 +48,8 @@ func handleSubscribers(channelName string, msg *redis.Message) {
 		handleCodeChangeFromChannel(messageData)
 	case "cursor_change":
 		handleCursorChangeFromChannel(messageData)
+	case "remove_connection":
+        handleRemoveConnection(messageData)
 	default:
 		log.Printf("Unhandled channel: %s", channelName)
 	}
@@ -106,6 +108,13 @@ func roomHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Check if the user already has an active connection
+	existingConn, err := rdb.HGet(ctx, "userConnections", userID).Result()
+	if err == nil && existingConn != "" {
+		http.Error(w, "User already connected", http.StatusConflict)
+		return
+	}
+
 	// Upgrade the HTTP connection to a WebSocket connection
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -115,8 +124,8 @@ func roomHandler(w http.ResponseWriter, r *http.Request) {
 	defer conn.Close()
 
 	// Add the WebSocket connection to the list of connections for the room
-	addConnection(roomID, conn)
-	defer removeConnection(roomID, conn)
+	addConnection(userID, roomID, conn.RemoteAddr().String(), conn)
+	defer removeConnection(userID, roomID, conn.RemoteAddr().String())
 
 	// Send initial data to the newly connected client
 	sendInitialData(roomID, conn)
@@ -168,23 +177,37 @@ func checkRoomExists(roomID string, w http.ResponseWriter) bool {
 }
 
 // addConnection adds a WebSocket connection to the list of connections for a room.
-func addConnection(roomID string, conn *websocket.Conn) {
+func addConnection(userID, roomID, connID string, conn *websocket.Conn) {
     connMutex.Lock()
     roomConnections[roomID] = append(roomConnections[roomID], conn)
     connMutex.Unlock()
+
+    // Store the connection ID in Redis
+    rdb.HSet(ctx, "userConnections", userID, connID)
 }
 
 // removeConnection removes a WebSocket connection from the list of connections for a room.
-func removeConnection(roomID string, conn *websocket.Conn) {
+func removeConnection(userID, roomID, connID string) {
+    // Publish a message to Redis to notify other instances of the removal
+    publishMessageToChannel("remove_connection", map[string]string{
+        "userID": userID,
+        "roomID": roomID,
+        "connID": connID,
+    })
+
+    // Remove the connection from the in-memory map in the current instance
     connMutex.Lock()
     defer connMutex.Unlock()
     connections := roomConnections[roomID]
     for i, c := range connections {
-        if c == conn {
+        if c.RemoteAddr().String() == connID {
             roomConnections[roomID] = append(connections[:i], connections[i+1:]...)
             break
         }
     }
+
+    // Remove the connection ID from Redis
+    rdb.HDel(ctx, "userConnections", userID)
 }
 
 // sendInitialData sends initial room data to a newly connected client.

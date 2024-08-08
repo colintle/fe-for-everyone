@@ -28,6 +28,11 @@ var (
     roomConnections = make(map[string][]*websocket.Conn)
 )
 
+// Map to store a WebSocket connection for each user
+var (
+    userConnections = make(map[string]*websocket.Conn)
+)
+
 // Generate a unique instance ID
 var instanceID = uuid.New().String()
 
