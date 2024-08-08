@@ -45,7 +45,7 @@ function SignUp() {
               type={showPassword ? "text" : "password"}
               id="password"
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-              placeholder="Enter at least 8+ characters"
+              placeholder="Enter your password"
             />
             <button
               type="button"
@@ -54,6 +54,17 @@ function SignUp() {
             >
               {!showPassword ? <IoIosEye/> : <IoIosEyeOff/>}
             </button>
+          </div>
+          <div className="mt-2 text-gray-600 text-xs">
+            <p>Password must:</p>
+            <ul className="list-disc list-inside">
+              <li>Be between 8 and 30 characters</li>
+              <li>Include at least one uppercase letter</li>
+              <li>Include at least one lowercase letter</li>
+              <li>Include at least one digit</li>
+              <li>Include at least one special character</li>
+              <li>No spaces</li>
+            </ul>
           </div>
         </div>
         <button
