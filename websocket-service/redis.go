@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"encoding/json"
 
 	"github.com/go-redis/redis/v8"
 )
@@ -35,6 +36,8 @@ func subscribeToRedis() {
 	subscribeToChannel("user_left")
 	subscribeToChannel("change_admin")
 	subscribeToChannel("change_problem")
+	subscribeToChannel("code_change")
+    subscribeToChannel("cursor_change")
 }
 
 // subscribeToChannel subscribes to a single Redis channel and handles incoming messages
@@ -52,4 +55,17 @@ func subscribeToChannel(channelName string) {
 			handleSubscribers(channelName, msg)
 		}
 	}()
+}
+
+func publishMessageToChannel(channel string, message map[string]string) {
+	msgBytes, err := json.Marshal(message)
+	if err != nil {
+		log.Printf("Error marshaling message for channel %s: %v", channel, err)
+		return
+	}
+
+	err = rdb.Publish(ctx, channel, msgBytes).Err()
+	if err != nil {
+		log.Printf("Error publishing message to channel %s: %v", channel, err)
+	}
 }

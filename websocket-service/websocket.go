@@ -39,6 +39,10 @@ func handleSubscribers(channelName string, msg *redis.Message) {
 		handleChangeAdmin(messageData)
 	case "change_problem":
 		handleChangeProblem(messageData)
+	case "code_change":
+		handleCodeChangeFromChannel(messageData)
+	case "cursor_change":
+		handleCursorChangeFromChannel(messageData)
 	default:
 		log.Printf("Unhandled channel: %s", channelName)
 	}

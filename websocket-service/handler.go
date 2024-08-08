@@ -340,11 +340,45 @@ func handleCodeChange(message WebSocketMessage, conn *websocket.Conn, roomID str
 
     fmt.Printf("Code for room %s updated successfully\n", roomID)
 
+    // Publish the code change to the "code_change" channel
+	publishMessageToChannel("code_change", map[string]string{
+		"roomID":  roomID,
+		"content": codeContent,
+	})
+
     // Notify other users in the room
     sendMessageToRoom(roomID, "CodeChange", "Code updated!", room.Code, conn)
 }
 
-// handleCursorChange handles updating the cursor position in a room and notifies other users
-func handleCursorChange(message interface{}, conn *websocket.Conn, roomID string){
-    sendMessageToRoom(roomID, "CursorChange", "One cursor has been updated!", message, conn)
+func handleCursorChange(content interface{}, conn *websocket.Conn, roomID string) {
+    // Convert content to JSON string
+    jsonContent, err := json.Marshal(content)
+    if err != nil {
+        log.Printf("Failed to serialize cursor change content: %v", err)
+        return
+    }
+
+    // Publish the cursor change to the "cursor_change" channel
+    publishMessageToChannel("cursor_change", map[string]string{
+        "roomID":  roomID,
+        "content": string(jsonContent),
+    })
+
+    // Send the cursor change message to the room
+    sendMessageToRoom(roomID, "CursorChange", "One cursor has been updated!", content, conn)
+}
+
+
+func handleCodeChangeFromChannel(data map[string]string) {
+	roomID := data["roomID"]
+	codeContent := data["content"]
+
+	sendMessageToRoom(roomID, "CodeChange", "Code updated!", codeContent, nil)
+}
+
+func handleCursorChangeFromChannel(data map[string]string) {
+	roomID := data["roomID"]
+	cursorData := data["content"]
+
+	sendMessageToRoom(roomID, "CursorChange", "Cursor position updated!", cursorData, nil)
 }
