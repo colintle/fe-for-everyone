@@ -1,6 +1,13 @@
 import React from 'react';
+import { useState } from 'react';
+
+import { IoIosEye } from "react-icons/io";
+import { IoIosEyeOff } from "react-icons/io";
+
 
 function Login() {
+  const [showPassword, setPassword] = useState(false)
+
   return (
     <div className="max-w-md mx-auto bg-white">
       <div className="flex justify-center mb-4">
@@ -25,29 +32,17 @@ function Login() {
           </label>
           <div className="relative">
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               id="password"
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
               placeholder="Enter your password"
             />
             <button
               type="button"
+              onClick={() => setPassword(!showPassword)}
               className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-600"
             >
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M15 12l4.94-4.94M15 12l4.94 4.94M15 12l-4.94-4.94M15 12l-4.94 4.94M4 4h16v16H4z"
-                ></path>
-              </svg>
+              {!showPassword ? <IoIosEye/> : <IoIosEyeOff/>}
             </button>
           </div>
         </div>
