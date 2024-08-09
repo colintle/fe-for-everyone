@@ -1,6 +1,7 @@
 import React from 'react'
 
-function Multi() {
+function Multi({problem}) {
+  console.log(problem)
   return (
     <div>Multi</div>
   )

@@ -1,5 +1,5 @@
 import React from 'react'
-import { useEffect, useState, createContext } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import {
   Outlet,
 } from "react-router-dom";
@@ -8,17 +8,18 @@ import Navbar from './components/Navbar';
 import Popup from './components/Popup';
 import Loading from "./components/Loading"
 import Form from './components/form/Form';
+import Join from "./components/multi/Join"
+import { MyContext } from './MyProvider';
 
 import refreshToken from './utils/refreshToken';
 
 function App() {
   const isMobile = window.matchMedia("only screen and (max-width: 1024px)").matches;
 
-  const [accessToken, setAccessToken] = useState("")
   const [loading, setLoading] = useState(true)
   const [form, setForm] = useState(false)
-
-  const accessTokenContext = createContext(accessToken)
+  const [join, setJoin] = useState(false)
+  const {setAccessToken} = useContext(MyContext)
 
   useEffect(() => {
     const token = refreshToken()
@@ -29,7 +30,7 @@ function App() {
       setForm(true)
     }
     setLoading(false)
-  }, [])
+  }, [setAccessToken])
 
   if(isMobile){
     return(
@@ -42,17 +43,18 @@ function App() {
       </Popup>
     )
   }
-
   return (
-    <accessTokenContext.Provider value={accessToken}>
+    <div>    
       <div className="flex flex-col h-screen">
-        <Navbar />
+        <Navbar setJoin={setJoin}/>
         <div className="flex-grow">
-          {form ? <Form/> : <Outlet/>}
-          {loading && <Loading/>}
+          {form && <Form/>}
+          {join && <Join setJoin={setJoin}/>}
+          {!form && !join && <Outlet/>}
         </div>
       </div>
-    </accessTokenContext.Provider>
+      {loading && <Loading/>}
+    </div>
   )
 }
 

@@ -16,10 +16,11 @@ function Step1({ nextStep }) {
   // Set the description based on the selected mode
   const description = selectedMode === 'Single'
     ? 'Single-Player Mode allows users to study independently, providing a focused environment for practicing coding problems and preparing for the Foundation Exam at UCF.'
-    : selectedMode === 'multi'
+    : selectedMode === 'Multi'
     ? 'Multi-Player Mode enables real-time collaboration, where users can join shared rooms to solve coding problems together, enhancing learning through group interaction and peer support.'
     : 'Description of the selected mode';
 
+  // IMPORTANT: Check to see if user is not in room before making room
   return (
     <div className="w-full mx-auto">
       <h2 className="text-2xl font-bold text-center mb-6">Select Mode</h2>

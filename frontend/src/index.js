@@ -6,26 +6,17 @@ import "./index.css";
 
 import Home from "./components/menu/Home";
 import History from "./components/history/History";
-import MultiLanding from "./components/multi/MultiLanding";
-
-const EmptyPage = () => {
-    return (
-      <div className="flex h-full items-center justify-center">
-        <div className="p-4">
-          <div className="text-center">
-            <h1 className="text-6xl font-bold mb-4">Oops!</h1>
-            <p className="text-lg mb-2">Sorry, an unexpected error has occurred.</p>
-            <p className="text-gray-500 italic">Not Found</p>
-          </div>
-        </div>
-      </div>
-    );
-  };
+import Code from './components/Code.js';
+import EmptyPage from './components/EmptyPage.js';
+import { MyProvider } from './MyProvider.js';
 
 const router = createBrowserRouter([
     {
       path: "/",
-      element: <App/>,
+      element:
+      <MyProvider>
+        <App/>
+      </MyProvider>,
       children: [
         {
           path: "/",
@@ -35,15 +26,18 @@ const router = createBrowserRouter([
           path: "/history",
           element: <History/>
         },
-        {
-          path: "/collab",
-          element: <MultiLanding/>
-        },
-        {
-          path: "*",
-          element: <EmptyPage/>
-        }
       ]
+    },
+    {
+      path: "/code",
+      element: 
+      <MyProvider>
+        <Code/>
+      </MyProvider>
+    },
+    {
+      path: "*",
+      element: <EmptyPage/>
     }
   ]);
 

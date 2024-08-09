@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
-const Navbar = () => {
+const Navbar = ({setJoin}) => {
   const location = useLocation()
   const [activeLink, setActiveLink] = useState(location.pathname);
 
@@ -57,12 +57,11 @@ const Navbar = () => {
             </div>
           </div>
           <div className="flex items-center">
-            <Link 
-              to={"/collab"}
-              onClick={() => switchPage("/collab")}
+            <button 
+              onClick={() => setJoin(true)}
               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 hover:font-bold">
               Join a Break Room
-            </Link>
+            </button>
           </div>
         </div>
       </div>
