@@ -26,14 +26,12 @@ const router = createBrowserRouter([
           path: "/history",
           element: <History/>
         },
+        {
+          path: "/code",
+          element: 
+            <Code/>
+        },
       ]
-    },
-    {
-      path: "/code",
-      element: 
-      <MyProvider>
-        <Code/>
-      </MyProvider>
     },
     {
       path: "*",

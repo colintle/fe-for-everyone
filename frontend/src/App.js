@@ -2,6 +2,7 @@ import React from 'react'
 import { useEffect, useState, useContext } from 'react';
 import {
   Outlet,
+  useLocation
 } from "react-router-dom";
 
 import Navbar from './components/Navbar';
@@ -19,7 +20,8 @@ function App() {
   const [loading, setLoading] = useState(true)
   const [form, setForm] = useState(false)
   const [join, setJoin] = useState(false)
-  const {setAccessToken} = useContext(MyContext)
+  const {single, multi, setSingle, setMulti, setAccessToken} = useContext(MyContext)
+  const location = useLocation()
 
   useEffect(() => {
     const token = refreshToken()
@@ -31,6 +33,26 @@ function App() {
     }
     setLoading(false)
   }, [setAccessToken])
+
+
+  useEffect(() => {
+    const handlePopState = () => {
+        if (window.location.pathname === '/code') {
+            window.location.reload();
+        }
+        else if (window.location.pathname === '/') {
+          setSingle(false)
+          setMulti(false)
+        }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    // Cleanup function to remove the event listener when the component unmounts
+    return () => {
+        window.removeEventListener('popstate', handlePopState);
+    };
+}, []);
 
   if(isMobile){
     return(
@@ -46,7 +68,7 @@ function App() {
   return (
     <div>    
       <div className="flex flex-col h-screen">
-        <Navbar setJoin={setJoin}/>
+        {location.pathname != "/code" && <Navbar setJoin={setJoin}/>}
         <div className="flex-grow">
           {form && <Form/>}
           {join && <Join setJoin={setJoin}/>}
