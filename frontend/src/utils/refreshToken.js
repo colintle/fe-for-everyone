@@ -1,5 +1,5 @@
 function refreshToken() {
-  return null
+  return true
 }
 
 export default refreshToken
