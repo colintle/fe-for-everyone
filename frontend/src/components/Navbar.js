@@ -1,13 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
-const Navbar = ({setJoin}) => {
-  const location = useLocation()
+const Navbar = ({ setJoin }) => {
+  const location = useLocation();
   const [activeLink, setActiveLink] = useState(location.pathname);
 
+  useEffect(() => {
+    setActiveLink(location.pathname);
+  }, [location.pathname]);
+
   const switchPage = (page) => {
-    setActiveLink(page)
-  }
+    setActiveLink(page);
+  };
 
   return (
     <nav className="bg-white">
@@ -21,7 +25,7 @@ const Navbar = ({setJoin}) => {
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               {/* Navbar items */}
               <Link
-                to={"/"}
+                to="/"
                 onClick={() => switchPage('/')}
                 className={`${
                   activeLink === '/'
@@ -32,7 +36,7 @@ const Navbar = ({setJoin}) => {
                 Home
               </Link>
               <Link
-                to={"/history"}
+                to="/history"
                 onClick={() => switchPage('/history')}
                 className={`${
                   activeLink === '/history'
@@ -43,8 +47,8 @@ const Navbar = ({setJoin}) => {
                 History
               </Link>
               <a
-                href={"https://www.cs.ucf.edu/registration/exm/"}
-                target='_blank'
+                href="https://www.cs.ucf.edu/registration/exm/"
+                target="_blank"
                 rel="noopener noreferrer"
                 className={`${
                   activeLink === '/problems'
@@ -59,7 +63,8 @@ const Navbar = ({setJoin}) => {
           <div className="flex items-center">
             <button 
               onClick={() => setJoin(true)}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 hover:font-bold">
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 hover:font-bold"
+            >
               Join a Break Room
             </button>
           </div>
