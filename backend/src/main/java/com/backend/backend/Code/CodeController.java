@@ -14,7 +14,7 @@ import org.springframework.web.client.RestTemplate;
 @RestController
 @RequestMapping("/code")
 public class CodeController {
-    
+
     @PostMapping("/execute")
     public ResponseEntity<?> executeCode(@RequestBody CodeRequest codeRequest) {
         // Validate input
@@ -46,6 +46,12 @@ public class CodeController {
 
                 String stdout = (String) runResult.get("stdout");
                 String stderr = (String) runResult.get("stderr");
+                String signal = (String) runResult.get("signal");
+
+                // Check if the signal is SIGKILL
+                if ("SIGKILL".equals(signal)) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while executing the code");
+                }
 
                 // Return stderr if there is any error output, otherwise return stdout
                 if (stderr != null && !stderr.isEmpty()) {
@@ -53,10 +59,10 @@ public class CodeController {
                 } else if (stdout != null && !stdout.isEmpty()) {
                     return ResponseEntity.ok(stdout);
                 } else {
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("No output generated");
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while executing the code");
                 }
             } else {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected response from code execution API");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while executing the code");
             }
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while executing the code");
