@@ -15,7 +15,7 @@ import { useNavigate } from 'react-router-dom'; // Import useNavigate
 function Single() {
   const [isCompleted, setIsCompleted] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(600); // 10 minutes
+  const [timeLeft, setTimeLeft] = useState(7200); // 2 hours in seconds
   const [isRunning, setIsRunning] = useState(false);
   const [output, setOutput] = useState("Run code to see output!"); 
   const [isCodeRunning, setIsCodeRunning] = useState(false); 
@@ -82,7 +82,7 @@ int main() {
     setLoading(true);
     setTimeout(() => {
       if (!isRunning && timeLeft === 0) {
-        setTimeLeft(600); // Reset the timer to 10 minutes if it has hit zero
+        setTimeLeft(7200); // Reset the timer to 2 hours if it has hit zero
       }
       setIsRunning(!isRunning);
       setLoading(false);
@@ -117,7 +117,7 @@ int main() {
           Run Code
         </button>
         <div className="flex-1 text-2xl text-center text-blue-600">
-          {Math.floor(timeLeft / 60)}:{timeLeft % 60 < 10 ? `0${timeLeft % 60}` : timeLeft % 60}
+          {Math.floor(timeLeft / 3600)}:{Math.floor((timeLeft % 3600) / 60) < 10 ? `0${Math.floor((timeLeft % 3600) / 60)}` : Math.floor((timeLeft % 3600) / 60)}:{timeLeft % 60 < 10 ? `0${timeLeft % 60}` : timeLeft % 60}
         </div>
         <div className="flex items-center">
           <button onClick={handleToggleCompletion} disabled={loading} className="mr-4">
