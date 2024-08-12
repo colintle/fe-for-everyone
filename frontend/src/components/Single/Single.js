@@ -10,15 +10,17 @@ import { Worker, Viewer } from '@react-pdf-viewer/core';
 import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
 import '@react-pdf-viewer/core/lib/styles/index.css';
 import '@react-pdf-viewer/default-layout/lib/styles/index.css';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 function Single() {
   const [isCompleted, setIsCompleted] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(1000); // 10 minutes
+  const [timeLeft, setTimeLeft] = useState(600); // 10 minutes
   const [isRunning, setIsRunning] = useState(false);
   const [output, setOutput] = useState("Run code to see output!"); 
   const [isCodeRunning, setIsCodeRunning] = useState(false); 
   const defaultLayoutPluginInstance = defaultLayoutPlugin();
+  const navigate = useNavigate(); // Initialize useNavigate
 
   useEffect(() => {
     if (isRunning && timeLeft > 0) {
@@ -95,6 +97,13 @@ int main() {
     }, 2000); 
   };
 
+  const handleExit = () => {
+    setLoading(true);
+    setTimeout(() => {
+      navigate("/"); // Navigate to the home page
+    }, 1000); // Show the loading animation for 1 second before navigating
+  };
+
   return (
     <div className="p-8 h-screen flex flex-col">
       <div className="flex justify-between items-center mb-4">
@@ -117,7 +126,11 @@ int main() {
           <button onClick={handleStartStopTimer} disabled={loading} className="mr-4">
             {loading ? <Loading /> : isRunning ? <MdStop className="text-blue-600 text-2xl" /> : <MdPlayArrow className="text-blue-600 text-2xl" />}
           </button>
-          <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+          <button 
+            onClick={handleExit} 
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            disabled={loading}
+          >
             Exit
           </button>
         </div>
