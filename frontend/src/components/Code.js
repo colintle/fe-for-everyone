@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { MyContext } from '../MyProvider';
-import EmptyPage from "./EmptyPage";
 import Multi from './multi/Multi';
 import Single from './Single/Single';
 import Loading from './Loading';
@@ -9,6 +9,7 @@ import Loading from './Loading';
 function Code() {
     const {single, multi } = useContext(MyContext);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate()
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -31,9 +32,7 @@ function Code() {
             <Multi problem={multi.exam}/>
         );
     } else {
-        return (
-            <EmptyPage/>
-        );
+        navigate("/")
     }
 }
 

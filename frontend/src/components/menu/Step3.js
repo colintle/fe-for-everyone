@@ -10,6 +10,9 @@ function Step3({ data, prevStep, submit }) {
       <div className="mb-4">
         <p><strong>Exam:</strong> {data.exam}</p>
       </div>
+      {data.mode === "Multi" && <div className="mb-4">
+        <p><strong>Room Name:</strong> {data.roomName}</p>
+      </div>}
       <div className="flex justify-between">
         <button
           onClick={prevStep}

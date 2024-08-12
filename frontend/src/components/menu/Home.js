@@ -11,7 +11,8 @@ function Home() {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     mode: '',
-    exam: ''
+    exam: '',
+    roomName: ''
   });
   const {setSingle, setMulti} = useContext(MyContext)
   const navigate = useNavigate()
@@ -20,10 +21,11 @@ function Home() {
   const nextStep = () => setCurrentStep(currentStep + 1);
   const prevStep = () => setCurrentStep(currentStep - 1);
 
-  const handleModeSelection = (mode) => {
+  const handleModeSelection = (data) => {
     setFormData((prevData) => ({
       ...prevData,
-      mode: mode,
+      mode: data.mode,
+      roomName: data.roomName
     }));
     nextStep();
   };

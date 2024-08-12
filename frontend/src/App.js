@@ -20,7 +20,7 @@ function App() {
   const [loading, setLoading] = useState(true)
   const [form, setForm] = useState(false)
   const [join, setJoin] = useState(false)
-  const {single, multi, setSingle, setMulti, setAccessToken} = useContext(MyContext)
+  const {setSingle, setMulti, setAccessToken} = useContext(MyContext)
   const location = useLocation()
 
   useEffect(() => {
@@ -52,7 +52,7 @@ function App() {
     return () => {
         window.removeEventListener('popstate', handlePopState);
     };
-}, []);
+}, [setSingle, setMulti]);
 
   if(isMobile){
     return(
@@ -68,7 +68,7 @@ function App() {
   return (
     <div>    
       <div className="flex flex-col h-screen">
-        {location.pathname != "/code" && <Navbar setJoin={setJoin}/>}
+        {location.pathname !== "/code" && <Navbar setJoin={setJoin}/>}
         <div className="flex-grow">
           {form && <Form/>}
           {join && <Join setJoin={setJoin}/>}
