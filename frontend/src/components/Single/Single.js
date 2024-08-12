@@ -43,7 +43,10 @@ function Single() {
             },
             ".cm-scroller": {
               overflow: "auto",
-            }
+            },
+            ".cm-content": {
+              fontSize: "16px", // Increase the font size
+            },
           }),
         ],
         parent: editorParent, // Attach editor to DOM element
@@ -81,7 +84,12 @@ int main() {
     <div className="p-8 h-screen flex flex-col">
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
-        <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+        <button 
+          className={`bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition duration-200 ${
+            !isRunning ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
+          disabled={!isRunning} // Disable when the timer is paused
+        >
           Run Code
         </button>
         <div className="flex-1 text-2xl text-center text-blue-600">
@@ -102,8 +110,7 @@ int main() {
 
       {/* Main Content */}
       <div className="grid grid-cols-2 gap-2 flex-grow h-5/6">
-        {/* PDF Viewer */}
-        <div className="border rounded overflow-auto h-full">
+        <div className="border rounded overflow-auto h-full" style={{ pointerEvents: isRunning ? 'auto' : 'none', opacity: isRunning ? 1 : 0.5 }}>
           <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
             <Viewer 
               fileUrl="/FE-May23.pdf" 
@@ -119,8 +126,13 @@ int main() {
           </div>
 
           {/* Output and Test Cases */}
-          <div className="border rounded overflow-auto p-4" style={{ height: '43vh' }}>
-            Run code to see output!
+          <div 
+            className="border rounded overflow-y-auto p-4" 
+            style={{ height: '43vh', whiteSpace: 'pre-wrap', overflowX: 'hidden' }}
+          >
+            {"main.c: In function 'multiplyMatrices':\nmain.c:34:22: warning: implicit declaration of function 'createMatrx'; did you mean 'createMatrix'? [-Wimplicit-function-declaration]\n   34 |     Matrix *result = createMatrx(a->rows, b->cols);\n      |                      ^~~~~~~~~~~\n      |                      createMatrix\nmain.c:34:22: warning: initialization of 'Matrix *' from 'int' makes pointer from integer without a cast [-Wint-conversion]\n/usr/bin/ld: /tmp/ccF4ik20.o: in function `multiplyMatrices':\nmain.c:(.text+0x139): undefined reference to `createMatrx'\ncollect2: error: ld returned 1 exit status\nchmod: cannot access 'a.out': No such file or directory\n".split('\n').map((line, index) => (
+              <div className='font-mono' key={index}>{line}</div>
+            ))}
           </div>
         </div>
       </div>
