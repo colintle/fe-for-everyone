@@ -5,7 +5,7 @@ import { EditorView, minimalSetup } from "codemirror";
 import { lineNumbers } from "@codemirror/view";
 import { EditorState } from "@codemirror/state"; 
 import Loading from '../Loading';
-import { MdOutlineCheckCircle, MdOutlineCircle, MdPlayArrow, MdStop } from "react-icons/md";
+import { MdOutlineCheckCircle, MdOutlineCircle, MdPlayArrow, MdStop, MdOutlineExitToApp } from "react-icons/md";
 import { Worker, Viewer } from '@react-pdf-viewer/core';
 import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
 import '@react-pdf-viewer/core/lib/styles/index.css';
@@ -120,19 +120,18 @@ int main() {
           {Math.floor(timeLeft / 3600)}:{Math.floor((timeLeft % 3600) / 60) < 10 ? `0${Math.floor((timeLeft % 3600) / 60)}` : Math.floor((timeLeft % 3600) / 60)}:{timeLeft % 60 < 10 ? `0${timeLeft % 60}` : timeLeft % 60}
         </div>
         <div className="flex items-center">
-          <button onClick={handleToggleCompletion} disabled={loading} className="mr-4">
-            {loading ? <Loading /> : isCompleted ? <MdOutlineCheckCircle className="text-blue-600 text-2xl" /> : <MdOutlineCircle className="text-blue-600 text-2xl" />}
-          </button>
-          <button onClick={handleStartStopTimer} disabled={loading} className="mr-4">
-            {loading ? <Loading /> : isRunning ? <MdStop className="text-blue-600 text-2xl" /> : <MdPlayArrow className="text-blue-600 text-2xl" />}
-          </button>
-          <button 
+          <div onClick={handleToggleCompletion} disabled={loading} className="mr-2" title="Toggle Completion">
+            {loading ? <Loading /> : isCompleted ? <MdOutlineCheckCircle className="text-blue-600 text-2xl cursor-pointer" /> : <MdOutlineCircle className="text-blue-600 text-2xl cursor-pointer" />}
+          </div>
+          <div onClick={handleStartStopTimer} disabled={loading} className="mr-2" title={isRunning ? "Stop Timer" : "Start Timer"}>
+            {loading ? <Loading /> : isRunning ? <MdStop className="text-blue-600 text-2xl cursor-pointer" /> : <MdPlayArrow className="text-blue-600 text-2xl cursor-pointer" />}
+          </div>
+          <MdOutlineExitToApp 
             onClick={handleExit} 
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            className="text-blue-600 text-2xl cursor-pointer hover:text-blue-700"
+            title="Exit"
             disabled={loading}
-          >
-            Exit
-          </button>
+          />
         </div>
       </div>
 
