@@ -4,13 +4,14 @@ import { HiMiniArrowSmallLeft, HiMiniArrowSmallRight } from "react-icons/hi2";
 
 const generateExamOptions = () => {
   const seasons = ['Spring', 'Summer', 'Fall'];
-  const options = [];
+  let options = [];
   for (let year = 2021; year <= 2024; year++) {
     for (const season of seasons) {
       options.push({ value: `${season} ${year}` });
     }
   }
   options.push({value: "Random"})
+  options = options.filter((key) => key.value !== "Fall 2024")
   return options.reverse();
 };
 
