@@ -7,9 +7,9 @@ import Single from './Single/Single';
 import Loading from './Loading';
 
 function Code() {
-    const {single, multi } = useContext(MyContext);
+    const { single, multi } = useContext(MyContext);
     const [loading, setLoading] = useState(true);
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -19,20 +19,20 @@ function Code() {
         return () => clearTimeout(timer); 
     }, []);
 
+    useEffect(() => {
+        if (!single && !multi && !loading) {
+            navigate("/");
+        }
+    }, [single, multi, loading, navigate]);
+
     if (loading) {
-        return (
-            <Loading/>
-        );
+        return <Loading />;
     } else if (single) {
-        return (
-          <Single problem={single.exam}/>
-        );
+        return <Single problem={single.exam} />;
     } else if (multi) {
-        return (
-            <Multi problem={multi.exam}/>
-        );
+        return <Multi problem={multi.exam} />;
     } else {
-        navigate("/")
+        return null; // Or any other fallback UI
     }
 }
 

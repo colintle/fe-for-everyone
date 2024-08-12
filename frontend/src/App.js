@@ -15,7 +15,7 @@ import { MyContext } from './MyProvider';
 import refreshToken from './utils/refreshToken';
 
 function App() {
-  const isMobile = window.matchMedia("only screen and (max-width: 1024px)").matches;
+  const isMobile = window.matchMedia("only screen and (max-width: 1024px), (max-height: 768px)").matches;
 
   const [loading, setLoading] = useState(true)
   const [form, setForm] = useState(false)
