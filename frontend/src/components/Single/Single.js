@@ -12,7 +12,7 @@ import '@react-pdf-viewer/core/lib/styles/index.css';
 import '@react-pdf-viewer/default-layout/lib/styles/index.css';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
-function Single() {
+function Single({ problem }) {
   const [isCompleted, setIsCompleted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(7200); // 2 hours in seconds
@@ -139,7 +139,7 @@ int main() {
         <div className="border rounded overflow-auto h-full" style={{ pointerEvents: isRunning ? 'auto' : 'none', opacity: isRunning ? 1 : 0.5 }}>
           <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
             <Viewer 
-              fileUrl="/FE-May23.pdf" 
+              fileUrl={`/${problem}.pdf`} 
               plugins={[defaultLayoutPluginInstance]}
             />
           </Worker>
