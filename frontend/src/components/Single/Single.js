@@ -174,7 +174,7 @@ int main() {
         <div className="border rounded overflow-auto h-full" style={{ pointerEvents: isRunning ? 'auto' : 'none', opacity: isRunning ? 1 : 0.5 }}>
           <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
             <Viewer 
-              fileUrl={`/${problem}.pdf`} 
+              fileUrl={`/tests/${problem}.pdf`} 
               plugins={[defaultLayoutPluginInstance]}
             />
           </Worker>
