@@ -5,7 +5,7 @@ import { EditorView, minimalSetup } from "codemirror";
 import { lineNumbers } from "@codemirror/view";
 import { EditorState } from "@codemirror/state"; 
 import Loading from '../Loading';
-import { MdOutlineCheckCircle, MdOutlineCircle, MdPlayArrow, MdStop, MdOutlineExitToApp } from "react-icons/md";
+import { MdDownload, MdOutlineCheckCircle, MdOutlineCircle, MdPlayArrow, MdStop, MdOutlineExitToApp } from "react-icons/md";
 import { Worker, Viewer } from '@react-pdf-viewer/core';
 import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
 import '@react-pdf-viewer/core/lib/styles/index.css';
@@ -113,6 +113,16 @@ int main() {
     }, 1000);
   };
 
+  const handleDownload = () => {
+    const element = document.createElement("a");
+    const file = new Blob([editorContent], { type: 'text/plain' });
+    element.href = URL.createObjectURL(file);
+    element.download = "code.c";
+    document.body.appendChild(element); // Required for this to work in FireFox
+    element.click();
+    document.body.removeChild(element); // Clean up after download
+  };
+
   return (
     <div className="p-8 h-screen flex flex-col">
       <div className="flex justify-between items-center mb-4">
@@ -135,6 +145,11 @@ int main() {
           <div onClick={handleStartStopTimer} disabled={loading} className="mr-2" title={isRunning ? "Stop Timer" : "Start Timer"}>
             {loading ? <Loading /> : isRunning ? <MdStop className="text-blue-600 text-2xl cursor-pointer" /> : <MdPlayArrow className="text-blue-600 text-2xl cursor-pointer" />}
           </div>
+          <MdDownload 
+            onClick={handleDownload} 
+            className="text-blue-600 text-2xl cursor-pointer hover:text-blue-700 mr-2"
+            title="Download Code"
+          />
           <MdOutlineExitToApp 
             onClick={handleExit} 
             className="text-blue-600 text-2xl cursor-pointer hover:text-blue-700"
