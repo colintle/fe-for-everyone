@@ -10,7 +10,7 @@ import { Worker, Viewer } from '@react-pdf-viewer/core';
 import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
 import '@react-pdf-viewer/core/lib/styles/index.css';
 import '@react-pdf-viewer/default-layout/lib/styles/index.css';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
 
 function Single({ problem }) {
   const [isCompleted, setIsCompleted] = useState(false);
@@ -19,8 +19,9 @@ function Single({ problem }) {
   const [isRunning, setIsRunning] = useState(false);
   const [output, setOutput] = useState("Run code to see output!"); 
   const [isCodeRunning, setIsCodeRunning] = useState(false); 
+  const [editorContent, setEditorContent] = useState(""); // State to store editor content
   const defaultLayoutPluginInstance = defaultLayoutPlugin();
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (isRunning && timeLeft > 0) {
@@ -37,12 +38,17 @@ function Single({ problem }) {
   useEffect(() => {
     const editorParent = document.getElementById('editor');
     if (editorParent) {
-      let view = new EditorView({
+      const view = new EditorView({
         extensions: [
           minimalSetup, 
           StreamLanguage.define(c), 
           lineNumbers(),
           EditorState.readOnly.of(!isRunning), 
+          EditorView.updateListener.of((update) => {
+            if (update.changes) {
+              setEditorContent(update.state.doc.toString()); // Capture editor content
+            }
+          }),
           EditorView.theme({
             "&": {
               height: "100%", 
@@ -92,16 +98,19 @@ int main() {
   const handleRunCode = () => {
     setIsCodeRunning(true); 
     setTimeout(() => {
-      setOutput("Code executed successfully! Here is the output: Hello, World!");
+      setOutput(`Code executed successfully! Here is the output:\n${editorContent}`);
       setIsCodeRunning(false); 
     }, 2000); 
   };
 
   const handleExit = () => {
+    // Save the editor content before exiting
+    console.log("Saving editor content:", editorContent);
+    // Implement saving logic here (e.g., save to backend or local storage)
     setLoading(true);
     setTimeout(() => {
       navigate("/"); // Navigate to the home page
-    }, 1000); // Show the loading animation for 1 second before navigating
+    }, 1000);
   };
 
   return (
