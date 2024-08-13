@@ -27,7 +27,6 @@ function History() {
   };
 
   const handleExamClick = (examName) => {
-    // Assuming the PDF files are located in the public directory or a similar accessible location
     const pdfPath = `/solutions/${examName}.pdf`;
     window.open(pdfPath, '_blank'); // Open PDF in a new tab
   };
@@ -35,7 +34,10 @@ function History() {
   return (
     <div className="flex flex-col items-center pt-48 h-full w-full">
       <div className='w-1/3'>
-        <h2 className="text-2xl font-bold text-center mb-6">History</h2>
+        <h2 className="text-2xl font-bold text-center mb-2">History</h2>
+        <p className="text-sm text-gray-500 text-center mb-6">
+          Click on a test to view the solutions.
+        </p>
         <div className="mb-6">
           <input
             type="text"

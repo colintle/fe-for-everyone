@@ -7,7 +7,7 @@ import Single from './Single/Single';
 import Loading from './Loading';
 
 function Code() {
-    const { single, multi } = useContext(MyContext);
+    const { single, multi, completedProblems } = useContext(MyContext);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
@@ -25,12 +25,18 @@ function Code() {
         }
     }, [single, multi, loading, navigate]);
 
+    const isCompleted = (examName) => {
+        return completedProblems.some(problem => problem.problemStatementPath === examName);
+    };
+
     if (loading) {
         return <Loading />;
     } else if (single) {
-        return <Single problem={single.exam} />;
+        const completed = isCompleted(single.exam);
+        return <Single problem={single.exam} completed={completed} />;
     } else if (multi) {
-        return <Multi problem={multi.exam} />;
+        const completed = isCompleted(multi.exam);
+        return <Multi problem={multi.exam} completed={completed} />;
     } else {
         return null; // Or any other fallback UI
     }

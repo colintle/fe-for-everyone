@@ -14,8 +14,8 @@ import { useNavigate } from 'react-router-dom';
 import Download from './Download';
 import Loading from '../Loading';  // Assuming this is the correct path for your Loading component
 
-function Single({ problem }) {
-  const [isCompleted, setIsCompleted] = useState(false);
+function Single({ problem, completed }) {
+  const [isCompleted, setIsCompleted] = useState(completed);
   const [loading, setLoading] = useState(false);  // Unified loading state
   const [timeLeft, setTimeLeft] = useState(7200); // 2 hours in seconds
   const [isRunning, setIsRunning] = useState(false);
