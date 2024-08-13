@@ -4,7 +4,6 @@ import { c } from "@codemirror/legacy-modes/mode/clike";
 import { EditorView, minimalSetup } from "codemirror";
 import { lineNumbers } from "@codemirror/view";
 import { EditorState } from "@codemirror/state"; 
-import Loading from '../Loading';
 import { MdDownload, MdOutlineCheckCircle, MdOutlineCircle, MdPlayArrow, MdStop, MdOutlineExitToApp } from "react-icons/md";
 import { Worker, Viewer } from '@react-pdf-viewer/core';
 import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
@@ -12,14 +11,18 @@ import '@react-pdf-viewer/core/lib/styles/index.css';
 import '@react-pdf-viewer/default-layout/lib/styles/index.css';
 import { useNavigate } from 'react-router-dom';
 
+import Download from './Download';
+import Loading from '../Loading';  // Assuming this is the correct path for your Loading component
+
 function Single({ problem }) {
   const [isCompleted, setIsCompleted] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);  // Unified loading state
   const [timeLeft, setTimeLeft] = useState(7200); // 2 hours in seconds
   const [isRunning, setIsRunning] = useState(false);
   const [output, setOutput] = useState("Run code to see output!"); 
   const [isCodeRunning, setIsCodeRunning] = useState(false); 
   const [editorContent, setEditorContent] = useState(""); // State to store editor content
+  const [downloadModal, setDownloadModal] = useState(false);
   const defaultLayoutPluginInstance = defaultLayoutPlugin();
   const navigate = useNavigate();
 
@@ -96,35 +99,44 @@ int main() {
   };
 
   const handleRunCode = () => {
+    setLoading(true);
     setIsCodeRunning(true); 
     setTimeout(() => {
       setOutput(`Code executed successfully! Here is the output:\n${editorContent}`);
       setIsCodeRunning(false); 
+      setLoading(false);
     }, 2000); 
   };
 
   const handleExit = () => {
-    // Save the editor content before exiting
-    console.log("Saving editor content:", editorContent);
-    // Implement saving logic here (e.g., save to backend or local storage)
     setLoading(true);
     setTimeout(() => {
       navigate("/"); // Navigate to the home page
     }, 1000);
   };
 
-  const handleDownload = () => {
-    const element = document.createElement("a");
-    const file = new Blob([editorContent], { type: 'text/plain' });
-    element.href = URL.createObjectURL(file);
-    element.download = "code.c";
-    document.body.appendChild(element); // Required for this to work in FireFox
-    element.click();
-    document.body.removeChild(element); // Clean up after download
+  const handleDownload = (filename) => {
+    setLoading(true);
+    setDownloadModal(false);
+    setTimeout(() => {
+      const element = document.createElement("a");
+      const file = new Blob([editorContent], { type: 'text/plain' });
+      element.href = URL.createObjectURL(file);
+      element.download = `${filename || 'code'}.c`;
+      document.body.appendChild(element); // Required for this to work in FireFox
+      element.click();
+      document.body.removeChild(element); // Clean up after download
+      setLoading(false);
+    }, 2000); // Simulate download delay
   };
 
   return (
-    <div className="p-8 h-screen flex flex-col">
+    <div className="p-8 h-screen flex flex-col relative">
+      {loading && (
+        <div className="absolute inset-0 bg-white bg-opacity-75 z-50 flex items-center justify-center">
+          <Loading />
+        </div>
+      )}
       <div className="flex justify-between items-center mb-4">
         <button 
           onClick={handleRunCode}
@@ -139,14 +151,14 @@ int main() {
           {Math.floor(timeLeft / 3600)}:{Math.floor((timeLeft % 3600) / 60) < 10 ? `0${Math.floor((timeLeft % 3600) / 60)}` : Math.floor((timeLeft % 3600) / 60)}:{timeLeft % 60 < 10 ? `0${timeLeft % 60}` : timeLeft % 60}
         </div>
         <div className="flex items-center">
-          <div onClick={handleToggleCompletion} disabled={loading} className="mr-2" title="Toggle Completion">
-            {loading ? <Loading /> : isCompleted ? <MdOutlineCheckCircle className="text-blue-600 text-2xl cursor-pointer" /> : <MdOutlineCircle className="text-blue-600 text-2xl cursor-pointer" />}
+          <div onClick={handleToggleCompletion} className="mr-2" title="Toggle Completion">
+            {isCompleted ? <MdOutlineCheckCircle className="text-blue-600 text-2xl cursor-pointer" /> : <MdOutlineCircle className="text-blue-600 text-2xl cursor-pointer" />}
           </div>
-          <div onClick={handleStartStopTimer} disabled={loading} className="mr-2" title={isRunning ? "Stop Timer" : "Start Timer"}>
-            {loading ? <Loading /> : isRunning ? <MdStop className="text-blue-600 text-2xl cursor-pointer" /> : <MdPlayArrow className="text-blue-600 text-2xl cursor-pointer" />}
+          <div onClick={handleStartStopTimer} className="mr-2" title={isRunning ? "Stop Timer" : "Start Timer"}>
+            {isRunning ? <MdStop className="text-blue-600 text-2xl cursor-pointer" /> : <MdPlayArrow className="text-blue-600 text-2xl cursor-pointer" />}
           </div>
           <MdDownload 
-            onClick={handleDownload} 
+            onClick={() => setDownloadModal(true)} 
             className="text-blue-600 text-2xl cursor-pointer hover:text-blue-700 mr-2"
             title="Download Code"
           />
@@ -154,7 +166,6 @@ int main() {
             onClick={handleExit} 
             className="text-blue-600 text-2xl cursor-pointer hover:text-blue-700"
             title="Exit"
-            disabled={loading}
           />
         </div>
       </div>
@@ -183,6 +194,7 @@ int main() {
           </div>
         </div>
       </div>
+      {downloadModal && <Download setClose={setDownloadModal} handleDownload={handleDownload}/>}
     </div>
   );
 }

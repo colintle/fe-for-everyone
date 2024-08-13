@@ -38,7 +38,7 @@ function Step2({ nextStep, prevStep }) {
 
   const handleNextClick = () => {
     if (selectedExam === "Random") {
-      const randomExam = allExams[Math.floor(Math.random() * (allExams.length - 2))].value;
+      let randomExam = allExams[Math.ceil(Math.random() * (allExams.length - 2))].value;
       nextStep(randomExam);
     } else {
       nextStep(selectedExam);
