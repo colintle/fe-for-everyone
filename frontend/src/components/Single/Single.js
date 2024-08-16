@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { StreamLanguage } from "@codemirror/language";
 import { c } from "@codemirror/legacy-modes/mode/clike"; 
 import { EditorView, minimalSetup } from "codemirror";
@@ -12,17 +12,20 @@ import '@react-pdf-viewer/default-layout/lib/styles/index.css';
 import { useNavigate } from 'react-router-dom';
 
 import Download from './Download';
-import Loading from '../Loading';  // Assuming this is the correct path for your Loading component
+import Loading from '../Loading';
+import { MyContext } from '../../MyProvider';
 
 function Single({ problem, completed }) {
   const [isCompleted, setIsCompleted] = useState(completed);
-  const [loading, setLoading] = useState(false);  // Unified loading state
+  const [loading, setLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(7200); // 2 hours in seconds
   const [isRunning, setIsRunning] = useState(false);
   const [output, setOutput] = useState("Run code to see output!"); 
   const [isCodeRunning, setIsCodeRunning] = useState(false); 
-  const [editorContent, setEditorContent] = useState(""); // State to store editor content
+  const [editorContent, setEditorContent] = useState("");
   const [downloadModal, setDownloadModal] = useState(false);
+  const {completedProblems, setCompletedProblems} = useContext(MyContext)
+
   const defaultLayoutPluginInstance = defaultLayoutPlugin();
   const navigate = useNavigate();
 
@@ -82,6 +85,17 @@ int main() {
   const handleToggleCompletion = () => {
     setLoading(true);
     setTimeout(() => {
+      if (!isCompleted) {
+        setCompletedProblems([
+          ...completedProblems,
+          { problemStatementPath: problem, date: new Date().toISOString().split('T')[0] },
+        ]);
+      } else {
+        setCompletedProblems(
+          completedProblems.filter((problemItem) => problemItem.problemStatementPath !== problem)
+        );
+      }
+  
       setIsCompleted(!isCompleted);
       setLoading(false);
     }, 1000);
