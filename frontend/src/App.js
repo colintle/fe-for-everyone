@@ -20,20 +20,20 @@ function App() {
   const [loading, setLoading] = useState(true)
   const [form, setForm] = useState(false)
   const [join, setJoin] = useState(false)
-  const {setSingle, setMulti, setAccessToken} = useContext(MyContext)
+  const {setSingle, setMulti, setAccessToken, logout} = useContext(MyContext)
   const location = useLocation()
 
   useEffect(() => {
-    const token = refreshToken()
-    if (token){
-      setAccessToken(token)
-    }
-    else{
-      setForm(true)
-    }
+      const token = refreshToken()
+      if (!logout && token){
+        setAccessToken(token)
+      }
+      else{
+        setForm(true)
+        setAccessToken(false)
+      }
     setLoading(false)
-  }, [setAccessToken])
-
+  }, [setAccessToken, logout])
 
   useEffect(() => {
     const handlePopState = () => {
@@ -48,7 +48,6 @@ function App() {
 
     window.addEventListener('popstate', handlePopState);
 
-    // Cleanup function to remove the event listener when the component unmounts
     return () => {
         window.removeEventListener('popstate', handlePopState);
     };
@@ -68,7 +67,7 @@ function App() {
   return (
     <div>    
       <div className="flex flex-col h-screen">
-        {location.pathname !== "/code" && <Navbar setJoin={setJoin}/>}
+        {location.pathname !== "/code" && <Navbar setJoin={setJoin} setLoading={setLoading}/>}
         <div className="flex-grow">
           {form && <Form/>}
           {join && <Join setJoin={setJoin}/>}

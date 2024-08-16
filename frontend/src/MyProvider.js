@@ -16,9 +16,11 @@ function MyProvider({children}) {
         }
     ])
     const [accessToken, setAccessToken] = useState("")
+    const [logout, setLogout] = useState(false)
 
     return (
-        <MyContext.Provider value={{single, setSingle, multi, setMulti, accessToken, setAccessToken, completedProblems, setCompletedProblems}}>
+        <MyContext.Provider 
+            value={{single, setSingle, multi, setMulti, accessToken, setAccessToken, completedProblems, setCompletedProblems, logout, setLogout}}>
             {children}
         </MyContext.Provider>
     )

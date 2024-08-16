@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { CiLogout } from "react-icons/ci";
+import { MyContext } from '../MyProvider';
 
-const Navbar = ({ setJoin }) => {
+const Navbar = ({ setJoin, setLoading }) => {
+  const { setLogout } = useContext(MyContext);
   const location = useLocation();
   const [activeLink, setActiveLink] = useState(location.pathname);
 
@@ -11,6 +14,14 @@ const Navbar = ({ setJoin }) => {
 
   const switchPage = (page) => {
     setActiveLink(page);
+  };
+
+  const handleLogout = () => {
+    setLoading(true);
+    setTimeout(() => {
+      setLogout(true);
+      setLoading(false);
+    }, 1000); // Simulate a short delay before logging out
   };
 
   return (
@@ -60,10 +71,14 @@ const Navbar = ({ setJoin }) => {
               </a>
             </div>
           </div>
-          <div className="flex items-center">
+          <div className="flex items-center space-x-4">
+              <CiLogout
+                onClick={handleLogout}
+                className="text-blue-600 text-2xl cursor-pointer hover:text-blue-700 mr-2" title="Logout"
+              />
             <button 
               onClick={() => setJoin(true)}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 hover:font-bold"
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
             >
               Join a Break Room
             </button>
