@@ -8,10 +8,10 @@ function PdfViewer({ problem, isRunning }) {
   const defaultLayoutPluginInstance = defaultLayoutPlugin();
 
   return (
-    <div className="border rounded overflow-auto h-full" style={{ pointerEvents: isRunning ? 'auto' : 'none', opacity: isRunning ? 1 : 0.5 }}>
+    <div className="border rounded overflow-auto h-full">
           <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
             <Viewer 
-              fileUrl={`/tests/${problem}.pdf`} 
+              fileUrl={isRunning ? `/tests/${problem}.pdf`: "/singleModeInstructions.pdf"} 
               plugins={[defaultLayoutPluginInstance]}
             />
           </Worker>

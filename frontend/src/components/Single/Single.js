@@ -11,7 +11,7 @@ import { MyContext } from '../../MyProvider';
 function Single({ problem, completed }) {
   const [isCompleted, setIsCompleted] = useState(completed);
   const [loading, setLoading] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(5); // 2 hours in seconds
+  const [timeLeft, setTimeLeft] = useState(7200); // 2 hours in seconds
   const [isRunning, setIsRunning] = useState(false);
   const [output, setOutput] = useState("Run code to see output!"); 
   const [editorContent, setEditorContent] = useState("");
