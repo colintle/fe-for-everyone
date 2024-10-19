@@ -7,9 +7,9 @@ services:
       dockerfile: Dockerfile
     env_file: .env
     ports:
-      - "3001:3000"
+      - "${FRONTEND_PORT_ON_DOCKER_HOST}:${FRONTEND_PORT_ON_CONTAINER}"
     networks:
-      - spring-boot-postgres-network
+      - fe-network
     volumes:
       - ./frontend/:/react-docker:delegated
       - /node_modules
@@ -17,12 +17,12 @@ services:
     platform: linux/amd64
     build: ./backend
     networks:
-      - spring-boot-postgres-network
+      - fe-network
     env_file: .env
     depends_on:
       - db
     ports:
-      - ${APPLICATION_PORT_ON_DOCKER_HOST}:${APPLICATION_PORT_ON_CONTAINER}
+      - ${BACKEND_PORT_ON_DOCKER_HOST}:${BACKEND_PORT_ON_CONTAINER}
     volumes:
       - ./backend/:/app
     command: ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:${DEBUG_PORT_ON_CONTAINER}"
@@ -31,11 +31,11 @@ services:
     platform: linux/amd64
     build: ./websocket-service
     ports:
-      - "8081:8081"
+      - "${WEBSOCKET_PORT_ON_DOCKER_HOST}:${WEBSOCKET_PORT_ON_CONTAINER}"
     volumes:
       - ./websocket-service/:/app:delegated
     networks:
-      - spring-boot-postgres-network
+      - fe-network
   db:
     container_name: postgres-container
     image: postgres:14.1-alpine
@@ -45,21 +45,35 @@ services:
     volumes:
       - db:/var/lib/postgresql/data
     networks:
-      - spring-boot-postgres-network
+      - fe-network
   redis:
     image: "redis:alpine"
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT_ON_DOCKER_HOST}:${REDIS_PORT_ON_CONTAINER}"
     networks:
-      - spring-boot-postgres-network
+      - fe-network
     volumes:
       - redis-data:/data
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq
+    ports:
+      - "${RABBITMQ_MESSAGE_PORT_ON_DOCKER_HOST}:${RABBITMQ_MESSAGE_PORT_ON_CONTAINER}"
+      - "${RABBITMQ_MANAGEMENT_PORT_ON_DOCKER_HOST}:${RABBITMQ_MANAGEMENT_PORT_ON_CONTAINER}"
+    networks:
+      - fe-network
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
 
 volumes:
   db:
   redis-data:
+  rabbitmq_data:
 
 networks:
-  spring-boot-postgres-network:
-    name: spring-boot-postgres-network
+  fe-network:
+    name: fe-network
     driver: bridge

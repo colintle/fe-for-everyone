@@ -29,9 +29,9 @@ var (
 )
 
 // Map to store a WebSocket connection for each user
-var (
-    userConnections = make(map[string]*websocket.Conn)
-)
+// var (
+//     userConnections = make(map[string]*websocket.Conn)
+// )
 
 // Generate a unique instance ID
 var instanceID = uuid.New().String()
@@ -45,6 +45,16 @@ func main() {
 
 	// Subscribe to Redis channels
 	subscribeToRedis()
+
+	conn, err := connectRabbitMQ()
+	if err != nil {
+		log.Fatalf("Could not connect to RabbitMQ: %v", err)
+	}
+	// comment out later
+	defer conn.Close()
+
+	// Rest of your code to publish/consume messages
+	log.Println("Successfully connected to RabbitMQ!")
 
 	// Set up HTTP handler for WebSocket connections
 	http.HandleFunc("/ws", roomHandler)
