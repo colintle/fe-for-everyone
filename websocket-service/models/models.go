@@ -1,4 +1,4 @@
-package main
+package models
 
 // User represents a user with a unique ID, username, and associated room ID
 type User struct {

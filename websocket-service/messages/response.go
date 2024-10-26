@@ -1,17 +1,22 @@
-package main
+package messages
 
 import (
 	"encoding/json"
 	"log"
 
 	"github.com/gorilla/websocket"
+    "websocket-service/models"
+    "websocket-service/instance"
 )
 
-// sendMessageToRoom sends a message to all clients connected to a specific room, except the sender.
-func sendMessageToRoom(roomID string, messageType string, content string, data interface{}, senderConn *websocket.Conn) {
+var connMutex = instance.GetConnMutex()
+var roomConnections = instance.GetRoomConnections()
+
+// SendMessageToRoom sends a message to all clients connected to a specific room, except the sender.
+func SendMessageToRoom(roomID string, messageType string, content string, data interface{}, senderConn *websocket.Conn) {
 
     // Create a WebSocketResponse message
-    msg := WebSocketResponse{
+    msg := models.WebSocketResponse{
         Type:    messageType,
         Content: content,
         Data:    data,
@@ -43,22 +48,19 @@ func sendMessageToRoom(roomID string, messageType string, content string, data i
     }
 }
 
-// closeRoomConnections closes all connections in a specific room and sends a delete notification.
-func closeRoomConnections(roomID string) {
+// CloseRoomConnections closes all connections in a specific room and sends a delete notification.
+func CloseRoomConnections(roomID string) {
     connMutex.Lock()
     connections, exists := roomConnections[roomID]
     if exists {
-        // Delete the room from the map
         delete(roomConnections, roomID)
 
-        // Create a WebSocketResponse message indicating the room has been deleted
-        message := WebSocketResponse{
+        message := models.WebSocketResponse{
             Type:    "RoomDeleted",
             Content: "This room has been deleted.",
             Data:    nil,
         }
 
-        // Serialize the message to JSON
         messageBytes, err := json.Marshal(message)
         if err != nil {
             log.Printf("Error marshaling message: %v", err)
@@ -68,14 +70,11 @@ func closeRoomConnections(roomID string) {
 
         // Iterate over all connections in the room
         for _, conn := range connections {
-            // Send the delete notification to the client
             if err := conn.WriteMessage(websocket.TextMessage, messageBytes); err != nil {
                 log.Printf("Error sending delete notification: %v", err)
             }
-            // Close the WebSocket connection
             conn.Close()
         }
     }
-    // Unlock the connection mutex after accessing the roomConnections map
     connMutex.Unlock()
 }

@@ -1,66 +1,30 @@
 package main
 
 import (
-	"context"
 	"log"
 	"net/http"
-	"sync"
 
-	"github.com/go-redis/redis/v8"
-	"github.com/gorilla/websocket"
-	"github.com/google/uuid"
+	"websocket-service/rabbitmq"
+	"websocket-service/redis"
 )
-
-// Context for Redis operations
-var ctx = context.Background()
-
-// Redis client instance
-var rdb *redis.Client
-
-// WebSocket upgrader with buffer sizes increased to handle large messages
-var upgrader = websocket.Upgrader{
-    ReadBufferSize:  65536,
-    WriteBufferSize: 65536,
-}
-
-// Map to store WebSocket connections for each room
-var (
-    roomConnections = make(map[string][]*websocket.Conn)
-)
-
-// Map to store a WebSocket connection for each user
-// var (
-//     userConnections = make(map[string]*websocket.Conn)
-// )
-
-// Generate a unique instance ID
-var instanceID = uuid.New().String()
-
-// Mutex for synchronizing access to roomConnections map
-var connMutex = &sync.Mutex{}
 
 func main() {
-	// Initialize Redis connection
-	initializeRedis()
+	rdb := redis.InitializeRedis()
+	defer rdb.Close()
 
-	// Subscribe to Redis channels
-	subscribeToRedis()
+	redis.SubscribeToRedis()
 
-	conn, err := connectRabbitMQ()
+	conn, err := rabbitmq.ConnectRabbitMQ()
 	if err != nil {
 		log.Fatalf("Could not connect to RabbitMQ: %v", err)
 	}
-	// comment out later
 	defer conn.Close()
 
-	// Rest of your code to publish/consume messages
-	log.Println("Successfully connected to RabbitMQ!")
+	go rabbitmq.SubscribeToQueues(conn)
 
-	// Set up HTTP handler for WebSocket connections
-	http.HandleFunc("/ws", roomHandler)
+	http.HandleFunc("/ws", redis.RoomHandler)
 	log.Println("WebSocket service starting on :8081...")
 
-	// Start the HTTP server on port 8081
 	if err := http.ListenAndServe(":8081", nil); err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
