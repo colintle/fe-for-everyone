@@ -11,7 +11,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import com.backend.backend.Redis.MessagePublisher;
+import com.backend.backend.RabbitMQ.MessagePublisher;
 import com.backend.backend.Redis.RedisService;
 import com.backend.backend.User.User;
 import com.backend.backend.User.User.Role;

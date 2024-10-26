@@ -365,7 +365,7 @@ func handleCursorChange(content interface{}, conn *websocket.Conn, roomID string
     })
 
     // Send the cursor change message to the room
-    sendMessageToRoom(roomID, "CursorChange", "One cursor has been updated!", content, conn)
+    sendMessageToRoom(roomID, "CursorChange", "Cursor position updated!", content, conn)
 }
 
 
