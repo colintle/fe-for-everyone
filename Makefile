@@ -8,7 +8,7 @@ default: build
 #================================================================================
 build: ## Build all Docker images
 	@echo "Building FE Images"
-	@$(DOCKER_COMPOSE) build
+	@$(DOCKER_COMPOSE) build --no-cache
 
 start-attached: ## Start the server in attached mode
 	@echo "${GREEN}Starting FE in attached mode${RESET}"

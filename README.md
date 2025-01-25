@@ -30,6 +30,12 @@ This project is a collaborative environment designed for students at the Univers
     cd fe-for-everyone
     ```
 
+2. **Navigate to the frontend directory and install dependencies:**
+    ```sh
+    cd frontend
+    npm install
+    ```
+
 ### Windows Line Ending Conversion for `mvnw`
 
 If you are on Windows, you need to convert the line endings of the `mvnw` file from Windows-style (CRLF) to Unix-style (LF) to ensure compatibility with Unix-based environments like Docker.
@@ -40,12 +46,12 @@ If you are on Windows, you need to convert the line endings of the `mvnw` file f
   3. **Click on the line ending format** and select `LF` to convert the line endings.
   4. **Save the file**.
 
-2. **Build the Docker containers:**
+3. **Build the Docker containers:**
     ```sh
     make build
     ```
 
-3. **Start the application:**
+4. **Start the application:**
     ```sh
     make start-attached
     ```
