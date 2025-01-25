@@ -21,6 +21,8 @@ services:
     env_file: .env
     depends_on:
       - db
+      - redis
+      - rabbitmq
     ports:
       - ${BACKEND_PORT_ON_DOCKER_HOST}:${BACKEND_PORT_ON_CONTAINER}
     volumes:
