@@ -30,6 +30,16 @@ This project is a collaborative environment designed for students at the Univers
     cd fe-for-everyone
     ```
 
+### Windows Line Ending Conversion for `mvnw`
+
+If you are on Windows, you need to convert the line endings of the `mvnw` file from Windows-style (CRLF) to Unix-style (LF) to ensure compatibility with Unix-based environments like Docker.
+
+- **Using Visual Studio Code:**
+  1. **Open the `mvnw` file** in Visual Studio Code.
+  2. **Locate the line ending format** at the bottom-right corner of the window (e.g., `CRLF`).
+  3. **Click on the line ending format** and select `LF` to convert the line endings.
+  4. **Save the file**.
+
 2. **Build the Docker containers:**
     ```sh
     make build
