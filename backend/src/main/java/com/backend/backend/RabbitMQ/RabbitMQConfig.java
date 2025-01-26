@@ -2,39 +2,23 @@ package com.backend.backend.RabbitMQ;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
 
 @Configuration
 public class RabbitMQConfig {
-    
+
     @Bean
-    public Queue createRoomQueue(){
-        return new Queue("create_room");
+    public MessageConverter jsonMessageConverter() {
+        return new Jackson2JsonMessageConverter();
     }
 
     @Bean
-    public Queue deleteRoomQueue(){
-        return new Queue("delete_room");
-    }
-
-    @Bean
-    public Queue userJoinedQueue(){
-        return new Queue("user_joined");
-    }
-
-    @Bean
-    public Queue userLeftQueue(){
-        return new Queue("user_left");
-    }   
-
-    @Bean
-    public Queue changeAdminQueue(){
-        return new Queue("change_admin");
-    }
-
-    @Bean
-    public Queue changeProblemQueue(){
-        return new Queue("change_problem");
+    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
+        RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+        rabbitTemplate.setMessageConverter(jsonMessageConverter());
+        return rabbitTemplate;
     }
 }
