@@ -13,6 +13,7 @@ services:
     volumes:
       - ./frontend/:/react-docker:delegated
       - /node_modules
+
   backend:
     platform: linux/amd64
     build: ./backend
@@ -20,17 +21,34 @@ services:
       - fe-network
     env_file: .env
     depends_on:
-      - db
-      - redis
-      - rabbitmq
+      db:
+        condition: service_started
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     ports:
       - ${BACKEND_PORT_ON_DOCKER_HOST}:${BACKEND_PORT_ON_CONTAINER}
     volumes:
       - ./backend/:/app
     command: ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:${DEBUG_PORT_ON_CONTAINER}"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${BACKEND_PORT_ON_CONTAINER}/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
   websocket-service:
     env_file: .env
     platform: linux/amd64
+    depends_on:
+      backend:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     build: ./websocket-service
     ports:
       - "${WEBSOCKET_PORT_ON_DOCKER_HOST}:${WEBSOCKET_PORT_ON_CONTAINER}"
@@ -38,6 +56,8 @@ services:
       - ./websocket-service/:/app:delegated
     networks:
       - fe-network
+    restart: unless-stopped
+
   db:
     container_name: postgres-container
     image: postgres:14.1-alpine
@@ -48,6 +68,7 @@ services:
       - db:/var/lib/postgresql/data
     networks:
       - fe-network
+
   redis:
     image: "redis:alpine"
     ports:
@@ -56,6 +77,12 @@ services:
       - fe-network
     volumes:
       - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   rabbitmq:
     image: rabbitmq:management
     container_name: rabbitmq
@@ -69,6 +96,11 @@ services:
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   db:

@@ -1,10 +1,10 @@
 package rabbitmq
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
-	"encoding/json"
 
 	"github.com/rabbitmq/amqp091-go"
 )
@@ -12,12 +12,14 @@ import (
 func ConnectRabbitMQ() (*amqp091.Connection, error) {
 	username := os.Getenv("RABBITMQ_USERNAME")
 	password := os.Getenv("RABBITMQ_PASSWORD")
-	
+
+	rabbitmq_port := os.Getenv("RABBITMQ_MESSAGE_PORT_ON_DOCKER_HOST")
+
 	if username == "" || password == "" {
 		log.Fatalf("Environment variables RABBITMQ_USERNAME or RABBITMQ_PASSWORD are not set")
 	}
 
-	rabbitMQURL := fmt.Sprintf("amqp://%s:%s@rabbitmq:5672/", username, password)
+	rabbitMQURL := fmt.Sprintf("amqp://%s:%s@rabbitmq:%s/", username, password, rabbitmq_port)
 
 	// Connect to RabbitMQ
 	conn, err := amqp091.Dial(rabbitMQURL)
