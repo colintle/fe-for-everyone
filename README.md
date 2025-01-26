@@ -16,6 +16,7 @@ This project is a collaborative environment designed for students at the Univers
 - **Backend:** Java Spring Boot
 - **Real-time Communication:** WebSockets in Golang
 - **Databases:** PostgreSQL, Redis
+- **Message Broker**: RabbitMQ
 
 ## Prerequisites
 
