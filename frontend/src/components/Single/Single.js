@@ -17,9 +17,6 @@ function Single({ problem, completed }) {
   const [editorContent, setEditorContent] = useState("");
   const [downloadModal, setDownloadModal] = useState(false);
 
-  const [inviteModal, setInviteModal] = useState(false);
-  const [membersModal, setMembersModal] = useState(false);
-
   const { completedProblems, setCompletedProblems } = useContext(MyContext);
   
   const navigate = useNavigate();

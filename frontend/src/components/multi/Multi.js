@@ -5,17 +5,25 @@ import PdfViewer from "../editor/PdfViewer"
 import CodeEditor from "../editor/CodeEditor"
 import CodeOutput from '../editor/CodeOutput';
 import Loading from '../Loading'; 
-import Download from '../Download'; 
+import Download from '../Download';
+
+import Invite from './Invite';
+import Members from './Members';
+
 import { MyContext } from '../../MyProvider';
 
-function Multi({ problem, completed }) {
+function Multi({ problem, completed, inviteLink, members }) {
   const [isCompleted, setIsCompleted] = useState(completed);
   const [loading, setLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(7200); // 2 hours in seconds
   const [isRunning, setIsRunning] = useState(false);
   const [output, setOutput] = useState("Run code to see output!"); 
   const [editorContent, setEditorContent] = useState("");
+
   const [downloadModal, setDownloadModal] = useState(false);
+  const [inviteModal, setInviteModal] = useState(false);
+  const [membersModal, setMembersModal] = useState(false);
+
   const { completedProblems, setCompletedProblems } = useContext(MyContext);
   
   const navigate = useNavigate();
@@ -114,6 +122,8 @@ function Multi({ problem, completed }) {
         </div>
       </div>
       {downloadModal && <Download setClose={setDownloadModal} handleDownload={handleDownload} />}
+      {inviteModal && <Invite setClose={setInviteModal} inviteLink={inviteLink} />}
+      {membersModal && <Members setClose={setMembersModal} members={members}/>}
     </div>
   );
 }

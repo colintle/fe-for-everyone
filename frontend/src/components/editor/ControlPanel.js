@@ -8,10 +8,13 @@ function ControlPanel({
   onRunCode, 
   onToggleCompletion, 
   onStartStopTimer, 
-  onDownload, 
+  onDownload,
+  onMembers,
+  onInvite,
   onExit,
   timeLeft,
-  isMulti
+  isMulti,
+
 }) {
   return (
     <div className="flex justify-between items-center mb-4">

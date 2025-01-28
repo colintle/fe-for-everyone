@@ -11,7 +11,7 @@ function Download({ setClose, handleDownload }) {
   };
 
   return (
-    <Popup>
+    <Popup onClose={() => setClose(false)}>
       <div className="relative">
         <button 
           onClick={() => setClose(false)} 
