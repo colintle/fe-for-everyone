@@ -1,23 +1,31 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ControlPanel from '../editor/ControlPanel';
-import PdfViewer from "../editor/PdfViewer"
-import CodeEditor from "../editor/CodeEditor"
+import PdfViewer from "../editor/PdfViewer";
+import CodeEditor from "../editor/CodeEditor";
 import CodeOutput from '../editor/CodeOutput';
 import Loading from '../Loading'; 
 import Download from '../Download';
-
 import Invite from './Invite';
 import Members from './Members';
 
 import { MyContext } from '../../MyProvider';
+
+import {
+  handleToggleCompletion,
+  handleStartStopTimer,
+  handleRunCode,
+  handleExit,
+  handleDownload,
+  handleOpenModal,
+} from '../../utils/codeEditorUtils';
 
 function Multi({ problem, completed, inviteLink, members }) {
   const [isCompleted, setIsCompleted] = useState(completed);
   const [loading, setLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(7200); // 2 hours in seconds
   const [isRunning, setIsRunning] = useState(false);
-  const [output, setOutput] = useState("Run code to see output!"); 
+  const [output, setOutput] = useState("Run code to see output!");
   const [editorContent, setEditorContent] = useState("");
 
   const [downloadModal, setDownloadModal] = useState(false);
@@ -25,7 +33,6 @@ function Multi({ problem, completed, inviteLink, members }) {
   const [membersModal, setMembersModal] = useState(false);
 
   const { completedProblems, setCompletedProblems } = useContext(MyContext);
-  
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -36,84 +43,77 @@ function Multi({ problem, completed, inviteLink, members }) {
 
       return () => clearTimeout(timer);
     } else if (timeLeft === 0) {
-      setIsRunning(false); 
+      setIsRunning(false);
     }
   }, [isRunning, timeLeft]);
 
-  const handleToggleCompletion = () => {
-    setLoading(true);
-    setTimeout(() => {
-      if (!isCompleted) {
-        setCompletedProblems([
-          ...completedProblems,
-          { problemStatementPath: problem, date: new Date().toISOString().split('T')[0] },
-        ]);
-      } else {
-        setCompletedProblems(
-          completedProblems.filter((problemItem) => problemItem.problemStatementPath !== problem)
-        );
-      }
-  
-      setIsCompleted(!isCompleted);
-      setLoading(false);
-    }, 1000);
+  const onToggleCompletion = () => {
+    handleToggleCompletion({
+      isCompleted,
+      setIsCompleted,
+      setLoading,
+      completedProblems,
+      setCompletedProblems,
+      problem,
+    });
   };
 
-  const handleStartStopTimer = () => {
-    setLoading(true);
-    setTimeout(() => {
-      if (!isRunning && timeLeft === 0) {
-        setTimeLeft(7200); 
-      }
-      setIsRunning(!isRunning);
-      setLoading(false);
-    }, 1000);
+  const onStartStopTimer = () => {
+    handleStartStopTimer({
+      isRunning,
+      setIsRunning,
+      timeLeft,
+      setTimeLeft,
+      setLoading,
+    });
   };
 
-  const handleRunCode = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setOutput(`Code executed successfully! Here is the output:\n${editorContent}`);
-      setLoading(false);
-    }, 2000); 
+  const onRunCode = () => {
+    handleRunCode({
+      setLoading,
+      editorContent,
+      setOutput,
+    });
   };
 
-  const handleExit = () => {
-    setLoading(true);
-    setTimeout(() => {
-      navigate("/"); 
-    }, 1000);
+  const onExit = () => {
+    handleExit({
+      setLoading,
+      navigate,
+    });
   };
 
-  const handleDownload = (filename) => {
-    setLoading(true);
-    setDownloadModal(false);
-    setTimeout(() => {
-      const element = document.createElement("a");
-      const file = new Blob([editorContent], { type: 'text/plain' });
-      element.href = URL.createObjectURL(file);
-      element.download = `${filename || 'code'}.c`;
-      document.body.appendChild(element); 
-      element.click();
-      document.body.removeChild(element); 
-      setLoading(false);
-    }, 2000); 
+  const onDownload = (filename) => {
+    handleDownload({
+      filename,
+      editorContent,
+      setLoading,
+      setDownloadModal,
+    });
   };
+
+  const onOpenDownloadModal = () => handleOpenModal(setDownloadModal);
+  const onOpenInviteModal = () => handleOpenModal(setInviteModal);
+  const onOpenMembersModal = () => handleOpenModal(setMembersModal);
 
   return (
     <div className="p-8 h-screen flex flex-col relative">
-      {loading && <Loading />} 
+      {loading && <Loading />}
+
       <ControlPanel
         isRunning={isRunning}
         isCompleted={isCompleted}
-        onRunCode={handleRunCode}
-        onToggleCompletion={handleToggleCompletion}
-        onStartStopTimer={handleStartStopTimer}
-        onDownload={() => setDownloadModal(true)}
-        onExit={handleExit}
+        onRunCode={onRunCode}
+        onToggleCompletion={onToggleCompletion}
+        onStartStopTimer={onStartStopTimer}
+        onDownload={onOpenDownloadModal}
+        onMembers={onOpenMembersModal}
+        onInvite={onOpenInviteModal}
+        onExit={onExit}
         timeLeft={timeLeft}
         isMulti={true}
       />
+
       <div className="grid grid-cols-2 gap-2 flex-grow h-5/6">
         <PdfViewer problem={problem} isRunning={isRunning} />
         <div className="flex flex-col gap-2">
@@ -121,9 +121,27 @@ function Multi({ problem, completed, inviteLink, members }) {
           <CodeOutput output={output} />
         </div>
       </div>
-      {downloadModal && <Download setClose={setDownloadModal} handleDownload={handleDownload} />}
-      {inviteModal && <Invite setClose={setInviteModal} inviteLink={inviteLink} />}
-      {membersModal && <Members setClose={setMembersModal} members={members}/>}
+
+      {downloadModal && (
+        <Download
+          setClose={setDownloadModal}
+          handleDownload={onDownload}
+        />
+      )}
+
+      {inviteModal && (
+        <Invite
+          setClose={setInviteModal}
+          inviteLink={inviteLink}
+        />
+      )}
+
+      {membersModal && (
+        <Members
+          setClose={setMembersModal}
+          members={members}
+        />
+      )}
     </div>
   );
 }

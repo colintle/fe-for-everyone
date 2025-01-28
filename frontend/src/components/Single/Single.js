@@ -5,8 +5,18 @@ import PdfViewer from "../editor/PdfViewer"
 import CodeEditor from "../editor/CodeEditor"
 import CodeOutput from '../editor/CodeOutput';
 import Loading from '../Loading'; 
-import Download from '../Download'; 
+import Download from '../Download';
+
 import { MyContext } from '../../MyProvider';
+
+import {
+  handleToggleCompletion,
+  handleStartStopTimer,
+  handleRunCode,
+  handleExit,
+  handleDownload,
+  handleOpenModal
+} from '../../utils/codeEditorUtils';
 
 function Single({ problem, completed }) {
   const [isCompleted, setIsCompleted] = useState(completed);
@@ -33,64 +43,49 @@ function Single({ problem, completed }) {
     }
   }, [isRunning, timeLeft]);
 
-  const handleToggleCompletion = () => {
-    setLoading(true);
-    setTimeout(() => {
-      if (!isCompleted) {
-        setCompletedProblems([
-          ...completedProblems,
-          { problemStatementPath: problem, date: new Date().toISOString().split('T')[0] },
-        ]);
-      } else {
-        setCompletedProblems(
-          completedProblems.filter((problemItem) => problemItem.problemStatementPath !== problem)
-        );
-      }
-  
-      setIsCompleted(!isCompleted);
-      setLoading(false);
-    }, 1000);
+  const onToggleCompletion = () => {
+    handleToggleCompletion({
+      isCompleted,
+      setIsCompleted,
+      setLoading,
+      completedProblems,
+      setCompletedProblems,
+      problem,
+    });
   };
 
-  const handleStartStopTimer = () => {
-    setLoading(true);
-    setTimeout(() => {
-      if (!isRunning && timeLeft === 0) {
-        setTimeLeft(7200); 
-      }
-      setIsRunning(!isRunning);
-      setLoading(false);
-    }, 1000);
+  const onStartStopTimer = () => {
+    handleStartStopTimer({
+      isRunning,
+      setIsRunning,
+      timeLeft,
+      setTimeLeft,
+      setLoading,
+    });
   };
 
-  const handleRunCode = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setOutput(`Code executed successfully! Here is the output:\n${editorContent}`);
-      setLoading(false);
-    }, 2000); 
+  const onRunCode = () => {
+    handleRunCode({
+      setLoading,
+      editorContent,
+      setOutput,
+    });
   };
 
-  const handleExit = () => {
-    setLoading(true);
-    setTimeout(() => {
-      navigate("/"); 
-    }, 1000);
+  const onExit = () => {
+    handleExit({
+      setLoading,
+      navigate,
+    });
   };
 
-  const handleDownload = (filename) => {
-    setLoading(true);
-    setDownloadModal(false);
-    setTimeout(() => {
-      const element = document.createElement("a");
-      const file = new Blob([editorContent], { type: 'text/plain' });
-      element.href = URL.createObjectURL(file);
-      element.download = `${filename || 'code'}.c`;
-      document.body.appendChild(element); 
-      element.click();
-      document.body.removeChild(element); 
-      setLoading(false);
-    }, 2000); 
+  const onDownload = (filename) => {
+    handleDownload({
+      filename,
+      editorContent,
+      setLoading,
+      setDownloadModal,
+    });
   };
 
   return (
@@ -99,11 +94,13 @@ function Single({ problem, completed }) {
       <ControlPanel
         isRunning={isRunning}
         isCompleted={isCompleted}
-        onRunCode={handleRunCode}
-        onToggleCompletion={handleToggleCompletion}
-        onStartStopTimer={handleStartStopTimer}
-        onDownload={() => setDownloadModal(true)}
-        onExit={handleExit}
+        onRunCode={onRunCode}
+        onToggleCompletion={onToggleCompletion}
+        onStartStopTimer={onStartStopTimer}
+        onDownload={() => handleOpenModal(setDownloadModal)}
+        onMembers={null}
+        onInvite={null}
+        onExit={onExit}
         timeLeft={timeLeft}
         isMulti={false}
       />
@@ -114,7 +111,7 @@ function Single({ problem, completed }) {
           <CodeOutput output={output} />
         </div>
       </div>
-      {downloadModal && <Download setClose={setDownloadModal} handleDownload={handleDownload} />}
+      {downloadModal && <Download setClose={setDownloadModal} handleDownload={onDownload} />}
     </div>
   );
 }
