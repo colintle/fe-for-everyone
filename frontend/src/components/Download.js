@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { IoIosClose } from "react-icons/io";
 
-import Popup from '../Popup';
+import Popup from './Popup';
 
 function Download({ setClose, handleDownload }) {
   const [filename, setFilename] = useState('');

@@ -5,7 +5,7 @@ import PdfViewer from "../editor/PdfViewer"
 import CodeEditor from "../editor/CodeEditor"
 import CodeOutput from '../editor/CodeOutput';
 import Loading from '../Loading'; 
-import Download from './Download'; 
+import Download from '../Download'; 
 import { MyContext } from '../../MyProvider';
 
 function Single({ problem, completed }) {

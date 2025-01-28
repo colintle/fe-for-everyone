@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { MyContext } from '../MyProvider';
 import Multi from './multi/Multi';
-import Single from './Single/Single';
+import Single from './single/Single';
 import Loading from './Loading';
 
 function Code() {
