@@ -104,6 +104,7 @@ function Multi({ problem, completed }) {
         onDownload={() => setDownloadModal(true)}
         onExit={handleExit}
         timeLeft={timeLeft}
+        isMulti={true}
       />
       <div className="grid grid-cols-2 gap-2 flex-grow h-5/6">
         <PdfViewer problem={problem} isRunning={isRunning} />

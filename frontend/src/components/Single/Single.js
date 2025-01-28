@@ -16,6 +16,10 @@ function Single({ problem, completed }) {
   const [output, setOutput] = useState("Run code to see output!"); 
   const [editorContent, setEditorContent] = useState("");
   const [downloadModal, setDownloadModal] = useState(false);
+
+  const [inviteModal, setInviteModal] = useState(false);
+  const [membersModal, setMembersModal] = useState(false);
+
   const { completedProblems, setCompletedProblems } = useContext(MyContext);
   
   const navigate = useNavigate();
@@ -104,6 +108,7 @@ function Single({ problem, completed }) {
         onDownload={() => setDownloadModal(true)}
         onExit={handleExit}
         timeLeft={timeLeft}
+        isMulti={false}
       />
       <div className="grid grid-cols-2 gap-2 flex-grow h-5/6">
         <PdfViewer problem={problem} isRunning={isRunning} />
