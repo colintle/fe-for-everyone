@@ -21,8 +21,10 @@ function ControlPanel({
       <button onClick={onRunCode} className={`bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition duration-200 ${!isRunning ? 'opacity-50 cursor-not-allowed' : ''}`} disabled={!isRunning}>
         Run Code
       </button>
-      <div>
+      <div className='flex items-center'>
+        {isMulti && <MdPeople onClick={onMembers} className="text-blue-600 text-2xl cursor-pointer hover:text-blue-700 mr-2" title="View Members" />}
         <Timer timeLeft={timeLeft} />
+        {isMulti && <MdOutlineSend onClick={onInvite} className="text-blue-600 text-2xl cursor-pointer hover:text-blue-700 ml-2" title="View Invite Link" />}
       </div>
       <div className="flex items-center">
         <div onClick={onToggleCompletion} className="mr-2" title="Toggle Completion">
