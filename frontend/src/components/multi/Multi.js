@@ -20,7 +20,7 @@ import {
   handleOpenModal,
 } from '../../utils/codeEditorUtils';
 
-function Multi({ problem, completed, inviteLink, members }) {
+function Multi({ problem, completed, inviteLink }) {
   const [isCompleted, setIsCompleted] = useState(completed);
   const [loading, setLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(7200); // 2 hours in seconds
@@ -96,6 +96,12 @@ function Multi({ problem, completed, inviteLink, members }) {
   const onOpenInviteModal = () => handleOpenModal(setInviteModal);
   const onOpenMembersModal = () => handleOpenModal(setMembersModal);
 
+
+  // Will need to filter socket messages for intial metadata, user_joined, and user_left,
+  const members = [
+    {userID: 1, username: "Alice"}, {userID: 2, username: "Bob"}, {userID: 3, username: "Charlie"}, {userID: 4, username: "David"}, {userID: 5, username: "Eve"}, {userID: 6, username: "Frank"}
+  ]
+
   return (
     <div className="p-8 h-screen flex flex-col relative">
       {loading && <Loading />}
@@ -140,6 +146,7 @@ function Multi({ problem, completed, inviteLink, members }) {
         <Members
           setClose={setMembersModal}
           members={members}
+          admin={{id: 0, username: "Admin"}}
         />
       )}
     </div>

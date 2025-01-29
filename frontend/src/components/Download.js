@@ -15,7 +15,7 @@ function Download({ setClose, handleDownload }) {
       <div className="relative">
         <button 
           onClick={() => setClose(false)} 
-          className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 transition duration-150"
+          className="absolute top-0 right-2 text-gray-500 hover:text-gray-700 transition duration-150"
         >
           <IoIosClose size={24} />
         </button>
