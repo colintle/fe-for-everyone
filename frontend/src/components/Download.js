@@ -26,7 +26,7 @@ function Download({ setClose, handleDownload }) {
             value={filename}
             onChange={(e) => setFilename(e.target.value)}
             placeholder="Enter filename"
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 mb-4"
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:border-blue-400 mb-4"
           />
           <button
             onClick={onDownloadClick}

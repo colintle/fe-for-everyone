@@ -25,7 +25,7 @@ public class ProblemController {
     }
 
     @PostMapping("/remove")
-    public ResponseEntity<Object> joinRoom(@RequestBody Problem problem, Authentication authentication) {
+    public ResponseEntity<Object> removeRoom(@RequestBody Problem problem, Authentication authentication) {
         return ResponseEntity.status(HttpStatus.OK).body(problemService.removeProblem(problem, authentication));
     }
 

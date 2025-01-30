@@ -34,12 +34,12 @@ function Members({ setClose, members, admin }) {
             placeholder="Search members..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full border border-gray-300 rounded px-4 py-2 
+            className="w-full border border-gray-300 rounded-lg px-4 py-2 
                        focus:outline-none focus:border-blue-400"
           />
         </div>
 
-        <div className="h-64 overflow-y-auto border border-gray-200 rounded">
+        <div className="h-64 overflow-y-auto border border-gray-200 rounded-lg">
           {showAdmin && (
             <div className="flex items-center space-x-2 p-2 border-b">
               <MdTagFaces className="text-blue-800" />

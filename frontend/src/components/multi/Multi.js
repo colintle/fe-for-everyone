@@ -20,7 +20,7 @@ import {
   handleOpenModal,
 } from '../../utils/codeEditorUtils';
 
-function Multi({ problem, completed, inviteLink }) {
+function Multi({ problem, completed, inviteCode }) {
   const [isCompleted, setIsCompleted] = useState(completed);
   const [loading, setLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(7200); // 2 hours in seconds
@@ -138,7 +138,7 @@ function Multi({ problem, completed, inviteLink }) {
       {inviteModal && (
         <Invite
           setClose={setInviteModal}
-          inviteLink={inviteLink}
+          inviteCode={inviteCode}
         />
       )}
 

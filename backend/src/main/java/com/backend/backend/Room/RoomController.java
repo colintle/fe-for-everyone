@@ -53,7 +53,6 @@ public class RoomController {
         return ResponseEntity.status(HttpStatus.OK).body(roomService.leaveRoom(authentication)); 
     }
 
-    // tested
     @GetMapping("/hasJoined")
     public ResponseEntity<Object> hasJoined(Authentication authentication) {
         return ResponseEntity.status(HttpStatus.OK).body(roomService.getJoinedRoom(authentication)); 

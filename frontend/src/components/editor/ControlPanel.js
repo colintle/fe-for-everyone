@@ -22,9 +22,9 @@ function ControlPanel({
         Run Code
       </button>
       <div className='flex items-center'>
-        {isMulti && <MdPeople onClick={onMembers} className="text-blue-600 text-2xl cursor-pointer hover:text-blue-700 mr-2" title="View Members" />}
+        {isMulti && <MdPeople onClick={onMembers} className="text-blue-600 text-2xl cursor-pointer hover:text-blue-700 mr-4" title="View Members" />}
         <Timer timeLeft={timeLeft} />
-        {isMulti && <MdOutlineSend onClick={onInvite} className="text-blue-600 text-2xl cursor-pointer hover:text-blue-700 ml-2" title="View Invite Link" />}
+        {isMulti && <MdOutlineSend onClick={onInvite} className="text-blue-600 text-2xl cursor-pointer hover:text-blue-700 ml-4" title="View Invite Link" />}
       </div>
       <div className="flex items-center">
         <div onClick={onToggleCompletion} className="mr-2" title="Toggle Completion">

@@ -37,7 +37,7 @@ function Code() {
     } else if (multi) {
         const completed = isCompleted(multi.exam);
         // will need to fetch the room data from api
-        return <Multi problem={multi.exam} completed={completed} inviteLink={""} />;
+        return <Multi problem={multi.exam} completed={completed} inviteCode={"example"} />;
     } else {
         return null; // Or any other fallback UI
     }
