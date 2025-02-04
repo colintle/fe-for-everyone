@@ -23,8 +23,7 @@ import {
 function Multi({ problem, completed, inviteCode }) {
   const [isCompleted, setIsCompleted] = useState(completed);
   const [loading, setLoading] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(7200); // 2 hours in seconds
-  const [isRunning, setIsRunning] = useState(false);
+  const isRunning = true;
   const [output, setOutput] = useState("Run code to see output!");
   const [editorContent, setEditorContent] = useState("");
 
@@ -35,18 +34,6 @@ function Multi({ problem, completed, inviteCode }) {
   const { completedProblems, setCompletedProblems } = useContext(MyContext);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (isRunning && timeLeft > 0) {
-      const timer = setTimeout(() => {
-        setTimeLeft(timeLeft - 1);
-      }, 1000);
-
-      return () => clearTimeout(timer);
-    } else if (timeLeft === 0) {
-      setIsRunning(false);
-    }
-  }, [isRunning, timeLeft]);
-
   const onToggleCompletion = () => {
     handleToggleCompletion({
       isCompleted,
@@ -55,16 +42,6 @@ function Multi({ problem, completed, inviteCode }) {
       completedProblems,
       setCompletedProblems,
       problem,
-    });
-  };
-
-  const onStartStopTimer = () => {
-    handleStartStopTimer({
-      isRunning,
-      setIsRunning,
-      timeLeft,
-      setTimeLeft,
-      setLoading,
     });
   };
 
@@ -111,12 +88,12 @@ function Multi({ problem, completed, inviteCode }) {
         isCompleted={isCompleted}
         onRunCode={onRunCode}
         onToggleCompletion={onToggleCompletion}
-        onStartStopTimer={onStartStopTimer}
+        onStartStopTimer={null}
         onDownload={onOpenDownloadModal}
         onMembers={onOpenMembersModal}
         onInvite={onOpenInviteModal}
         onExit={onExit}
-        timeLeft={timeLeft}
+        timeLeft={null}
         isMulti={true}
       />
 
