@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import Step1 from './Step1';
@@ -17,9 +17,13 @@ function Home() {
   const {setSingle, setMulti} = useContext(MyContext)
   const navigate = useNavigate()
 
-
   const nextStep = () => setCurrentStep(currentStep + 1);
   const prevStep = () => setCurrentStep(currentStep - 1);
+
+  useEffect(() => { 
+    setSingle(false)
+    setMulti(false)}, [setSingle, setMulti]
+  )
 
   const handleModeSelection = (data) => {
     setFormData((prevData) => ({
