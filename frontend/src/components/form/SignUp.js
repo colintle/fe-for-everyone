@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import { IoIosEye, IoIosEyeOff } from "react-icons/io";
 
+import { useApi } from '../../utils/api/useApi';
+import { GET } from '../../utils/api/methods';
+
 function SignUp() {
   const [showPassword, setPassword] = useState(false);
   const [errors, setErrors] = useState({});
+  const { callApi } = useApi();
 
-  const handleSubmit = (event) => {
+   const handleSubmit = async (event) => {
     event.preventDefault();
 
     const formErrors = {};
@@ -45,7 +49,8 @@ function SignUp() {
     setErrors(formErrors);
 
     if (Object.keys(formErrors).length === 0) {
-      console.log('Form submitted');
+        const data = await callApi('/health', GET, { name, username: email, password });
+        console.log(data);
     }
   };
 

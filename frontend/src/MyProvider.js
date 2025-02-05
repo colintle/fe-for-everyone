@@ -3,6 +3,7 @@ import React, { useState, createContext } from 'react';
 const MyContext = createContext()
 
 function MyProvider({children}) {
+    const [loading, setLoading] = useState(true)
     const [single, setSingle] = useState(false)
     const [multi, setMulti] = useState(false)
     const [completedProblems, setCompletedProblems] = useState([
@@ -18,9 +19,16 @@ function MyProvider({children}) {
     const [accessToken, setAccessToken] = useState("")
     const [logout, setLogout] = useState(false)
 
+    const handleLogout = () => {
+        setLoading(true);
+        setTimeout(() => {
+          setLogout(true);
+          setLoading(false);
+        }, 1000); // Simulate a short delay before logging out
+      };
     return (
         <MyContext.Provider 
-            value={{single, setSingle, multi, setMulti, accessToken, setAccessToken, completedProblems, setCompletedProblems, logout, setLogout}}>
+            value={{single, setSingle, multi, setMulti, accessToken, setAccessToken, completedProblems, setCompletedProblems, logout, loading, setLoading, handleLogout}}>
             {children}
         </MyContext.Provider>
     )
