@@ -21,7 +21,6 @@ function App() {
   const {setSingle, setMulti, setAccessToken, logout, loading, setLoading} = useContext(MyContext)
   const location = useLocation()
 
-  console.log(process.env)
   useEffect(() => {
       const token = refreshToken()
       if (!logout && token){

@@ -21,9 +21,8 @@ export const useApi = () => {
         headers,
         body: method !== 'GET' ? JSON.stringify(payload) : null,
       });
-      
+
       const data = await response.json();
-      console.log(data)
 
       if (response.status === 401 && data.expired) {
         console.warn("Token expired, attempting to refresh...");
