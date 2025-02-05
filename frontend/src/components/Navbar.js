@@ -3,8 +3,8 @@ import { Link, useLocation } from 'react-router-dom';
 import { CiLogout } from "react-icons/ci";
 import { MyContext } from '../MyProvider';
 
-const Navbar = ({ setJoin, setLoading }) => {
-  const { setLogout } = useContext(MyContext);
+const Navbar = ({ setJoin }) => {
+  const {handleLogout} = useContext(MyContext);
   const location = useLocation();
   const [activeLink, setActiveLink] = useState(location.pathname);
 
@@ -15,15 +15,7 @@ const Navbar = ({ setJoin, setLoading }) => {
   const switchPage = (page) => {
     setActiveLink(page);
   };
-
-  const handleLogout = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setLogout(true);
-      setLoading(false);
-    }, 1000); // Simulate a short delay before logging out
-  };
-
+  
   return (
     <nav className="bg-white">
       <div className="max-w-7xl mx-auto px-4 py-2 sm:px-6 lg:px-8">
@@ -73,7 +65,7 @@ const Navbar = ({ setJoin, setLoading }) => {
           </div>
           <div className="flex items-center space-x-4">
               <CiLogout
-                onClick={handleLogout}
+                onClick={() => handleLogout()}
                 className="text-blue-600 text-2xl cursor-pointer hover:text-blue-700 mr-2" title="Logout"
               />
             <button 

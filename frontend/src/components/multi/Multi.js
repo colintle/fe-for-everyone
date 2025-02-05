@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ControlPanel from '../editor/ControlPanel';
 import PdfViewer from "../editor/PdfViewer";
@@ -13,7 +13,6 @@ import { MyContext } from '../../MyProvider';
 
 import {
   handleToggleCompletion,
-  handleStartStopTimer,
   handleRunCode,
   handleExit,
   handleDownload,

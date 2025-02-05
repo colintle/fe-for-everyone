@@ -16,13 +16,12 @@ import refreshToken from './utils/refreshToken';
 
 function App() {
   const isMobile = window.matchMedia("only screen and (max-width: 1024px), (max-height: 768px)").matches;
-
-  const [loading, setLoading] = useState(true)
   const [form, setForm] = useState(false)
   const [join, setJoin] = useState(false)
-  const {setSingle, setMulti, setAccessToken, logout} = useContext(MyContext)
+  const {setSingle, setMulti, setAccessToken, logout, loading, setLoading} = useContext(MyContext)
   const location = useLocation()
 
+  console.log(process.env)
   useEffect(() => {
       const token = refreshToken()
       if (!logout && token){
@@ -33,7 +32,7 @@ function App() {
         setAccessToken(false)
       }
     setLoading(false)
-  }, [setAccessToken, logout])
+  }, [setAccessToken, setLoading, logout])
 
   useEffect(() => {
     const handlePopState = () => {
@@ -67,7 +66,7 @@ function App() {
   return (
     <div>    
       <div className="flex flex-col h-screen">
-        {location.pathname !== "/code" && <Navbar setJoin={setJoin} setLoading={setLoading}/>}
+        {location.pathname !== "/code" && <Navbar setJoin={setJoin}/>}
         <div className="flex-grow">
           {form && <Form/>}
           {join && <Join setJoin={setJoin}/>}
