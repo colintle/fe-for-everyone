@@ -6,6 +6,7 @@ function MyProvider({children}) {
     const [loading, setLoading] = useState(true)
     const [single, setSingle] = useState(false)
     const [multi, setMulti] = useState(false)
+    const [username, setUsername] = useState("")
     const [completedProblems, setCompletedProblems] = useState([
         {
             "problemStatementPath": "Fall 2022",
@@ -23,12 +24,14 @@ function MyProvider({children}) {
         setLoading(true);
         setTimeout(() => {
           setLogout(true);
+          setAccessToken("");
+          setUsername("");
           setLoading(false);
         }, 1000); // Simulate a short delay before logging out
       };
     return (
         <MyContext.Provider 
-            value={{single, setSingle, multi, setMulti, accessToken, setAccessToken, completedProblems, setCompletedProblems, logout, loading, setLoading, handleLogout}}>
+            value={{single, setSingle, multi, setMulti, accessToken, setAccessToken, completedProblems, setCompletedProblems, logout, loading, setLoading, handleLogout, username, setUsername}}>
             {children}
         </MyContext.Provider>
     )
