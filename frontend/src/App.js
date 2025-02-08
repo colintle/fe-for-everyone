@@ -12,26 +12,28 @@ import Form from './components/form/Form';
 import Join from "./components/multi/Join"
 import { MyContext } from './MyProvider';
 
-import refreshToken from './utils/refreshToken';
+import checkExpired from './utils/token';
 
 function App() {
   const isMobile = window.matchMedia("only screen and (max-width: 1024px), (max-height: 768px)").matches;
   const [form, setForm] = useState(false)
   const [join, setJoin] = useState(false)
-  const {setSingle, setMulti, setAccessToken, logout, loading, setLoading} = useContext(MyContext)
+  const {setSingle, setMulti, accessToken, setAccessToken, logout, loading, setLoading} = useContext(MyContext)
   const location = useLocation()
 
   useEffect(() => {
-      const token = refreshToken()
-      if (!logout && token){
-        setAccessToken(token)
-      }
-      else{
-        setForm(true)
-        setAccessToken(false)
-      }
+    console.log(accessToken)
+    setLoading(true)  
+    const expired = checkExpired(accessToken)
+    if (logout || expired){
+      setForm(true)
+      setAccessToken("")
+    }
+    else{
+      setForm(false)
+    }
     setLoading(false)
-  }, [setAccessToken, setLoading, logout])
+  }, [accessToken, setAccessToken, setLoading, logout])
 
   useEffect(() => {
     const handlePopState = () => {
@@ -53,7 +55,7 @@ function App() {
 
   if(isMobile){
     return(
-      <Popup>
+      <Popup onClose={null}>
         <div className='h-full flex justify-center items-center'>
           <p>
             Sorry, this website is only available on desktop devices.
