@@ -5,7 +5,7 @@ import Popup from '../Popup';
 
 function Join({ setJoin }) {
   return (
-    <Popup>
+    <Popup onClose={() => setJoin(false)}>
       <div className="relative">
         <button 
           onClick={() => setJoin(false)} 
