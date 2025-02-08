@@ -20,9 +20,9 @@ public class CorsConfig {
                         .allowedOrigins(frontendUrl)
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
-                        .allowCredentials(true);
+                        .allowCredentials(true)
+                        .exposedHeaders("Set-Cookie");
             }
         };
     }
 }
-
