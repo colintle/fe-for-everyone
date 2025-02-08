@@ -42,36 +42,34 @@ public class JWTController {
 
     @PostMapping("/register")
     public ResponseEntity<Object> register(@RequestBody User request, HttpServletResponse response) {
-        ConsumptionProbe probe = this.bucket.tryConsumeAndReturnRemaining(1);
-        if (!probe.isConsumed()) {
-            Map<String, Object> body = new HashMap<>();
-            body.put("message", "Rate limit exceeded. Try again later.");
-            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(body);
-        }
+        // ConsumptionProbe probe = this.bucket.tryConsumeAndReturnRemaining(1);
+        // if (!probe.isConsumed()) {
+            // Map<String, Object> body = new HashMap<>();
+            // body.put("message", "Rate limit exceeded. Try again later.");
+            // return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(body);
+        // }
         return ResponseEntity.ok(userService.register(request, response));
     }
 
     @PostMapping("/login")
     public ResponseEntity<Object> login(@RequestBody User request, HttpServletResponse response) {
-        ConsumptionProbe probe = this.bucket.tryConsumeAndReturnRemaining(1);
-        if (!probe.isConsumed()) {
-            Map<String, Object> body = new HashMap<>();
-            body.put("message", "Rate limit exceeded. Try again later.");
-            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(body);
-        }
+        // ConsumptionProbe probe = this.bucket.tryConsumeAndReturnRemaining(1);
+        // if (!probe.isConsumed()) {
+        //     Map<String, Object> body = new HashMap<>();
+        //     body.put("message", "Rate limit exceeded. Try again later.");
+        //     return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(body);
+        // }
         return ResponseEntity.ok(userService.authenticate(request, response));
     }
 
     @GetMapping("/refresh")
     public ResponseEntity<Object> refresh(HttpServletRequest request, HttpServletResponse response) {
-        ConsumptionProbe probe = this.bucket.tryConsumeAndReturnRemaining(1);
-        if (!probe.isConsumed()) {
-            Map<String, Object> body = new HashMap<>();
-            body.put("message", "Rate limit exceeded. Try again later.");
-            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(body);
-        }
+        // ConsumptionProbe probe = this.bucket.tryConsumeAndReturnRemaining(1);
+        // if (!probe.isConsumed()) {
+        //     Map<String, Object> body = new HashMap<>();
+        //     body.put("message", "Rate limit exceeded. Try again later.");
+        //     return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(body);
+        // }
         return ResponseEntity.ok(userService.refresh(request, response));
     }
-     
-     
 }
