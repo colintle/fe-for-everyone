@@ -7,7 +7,7 @@ function Form() {
   const [signUp, setSignUp] = useState(true);
 
   return (
-    <Popup>
+    <Popup onClose={() => null}>
       {signUp ? <SignUp /> : <Login />}
       <div className="text-center mt-4">
         {signUp ? (
