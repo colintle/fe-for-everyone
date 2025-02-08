@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 public class RateLimitService {
 
     public Bucket createBucket() {
-        long capacity = 10; // Maximum number of tokens
+        long capacity = 100; // Maximum number of tokens
         Duration duration = Duration.ofMinutes(5); // Refill interval
         Refill refill = Refill.greedy(capacity, duration);
         Bandwidth limit = Bandwidth.classic(capacity, refill);
