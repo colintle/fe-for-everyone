@@ -8,6 +8,7 @@ export const useApi = () => {
     try {
       const headers = {
         'Content-Type': 'application/json',
+
       };
 
       if (accessToken) {
@@ -19,14 +20,13 @@ export const useApi = () => {
       const response = await fetch(url, {
         method,
         headers,
+        credentials: "include",
         body: method !== 'GET' ? JSON.stringify(payload) : null,
       });
 
       const data = await response.json();
 
       if (response.status === 401 && data.expired) {
-        console.warn("Token expired, attempting to refresh...");
-
         const refreshResponse = await fetch(`${process.env.BACKEND_URL}/refresh`, {
           method: 'GET',
           credentials: 'include', // Cookies support
@@ -44,11 +44,10 @@ export const useApi = () => {
         else {
           handleLogout();
           return { error: 'Session expired. Please log in again.' };
-
         }
       }
 
-      return response.ok ? { data } : { error: data.error || 'Request failed, please try again.' };
+      return response.ok ?  data : { error: data.message || 'Request failed, please try again.' };
 
     } catch (error) {
       return { error: 'An error occurred. Please try again.' };
