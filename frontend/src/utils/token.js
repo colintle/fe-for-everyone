@@ -1,4 +1,4 @@
-const checkExpired = (accessToken) => {
+export const checkExpired = (accessToken) => {
   if (!accessToken) {
     return true;
   }
@@ -18,4 +18,17 @@ const checkExpired = (accessToken) => {
   }
 };
 
-export default checkExpired;
+export const refreshToken = async () => {
+  const refreshResponse = await fetch(`${process.env.BACKEND_URL}/refresh`, {
+    method: 'GET',
+    credentials: 'include',
+  });
+
+  if (refreshResponse.ok) {
+    const refreshData = await refreshResponse.json();
+    return refreshData.token
+  } 
+  else {
+    return false;
+  }
+}
