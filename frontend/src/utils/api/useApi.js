@@ -1,6 +1,8 @@
 import { useContext } from 'react';
 import { MyContext } from '../../MyProvider';
 
+import { refreshToken } from '../token';
+
 export const useApi = () => {
   const { accessToken, setAccessToken, handleLogout } = useContext(MyContext);
 
@@ -27,16 +29,13 @@ export const useApi = () => {
       const data = await response.json();
 
       if (response.status === 401 && data.expired) {
-        const refreshResponse = await fetch(`${process.env.BACKEND_URL}/refresh`, {
-          method: 'GET',
-          credentials: 'include', // Cookies support
-        });
 
-        if (refreshResponse.ok) {
-          const refreshData = await refreshResponse.json();
-          setAccessToken(refreshData.token);
+        const accessToken = await refreshToken();
 
-          headers['Authorization'] = `Bearer ${refreshData.token}`;
+        if (accessToken) {
+          setAccessToken(accessToken);
+
+          headers['Authorization'] = `Bearer ${accessToken}`;
           const retryResponse = await fetch(url, { method, headers, body: method !== 'GET' ? JSON.stringify(payload) : null });
           return await retryResponse.json();
 
@@ -51,7 +50,6 @@ export const useApi = () => {
 
     } catch (error) {
       return { error: 'An error occurred. Please try again.' };
-      
     }
   };
 
