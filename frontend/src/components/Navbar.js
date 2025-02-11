@@ -4,7 +4,7 @@ import { CiLogout } from "react-icons/ci";
 import { MyContext } from '../MyProvider';
 
 const Navbar = ({ setJoin }) => {
-  const {handleLogout} = useContext(MyContext);
+  const {handleLogout, setLoading} = useContext(MyContext);
   const location = useLocation();
   const [activeLink, setActiveLink] = useState(location.pathname);
 
@@ -65,7 +65,11 @@ const Navbar = ({ setJoin }) => {
           </div>
           <div className="flex items-center space-x-4">
               <CiLogout
-                onClick={() => handleLogout()}
+                onClick={() => {
+                  setLoading(true)
+                  handleLogout()
+                }
+              }
                 className="text-blue-600 text-2xl cursor-pointer hover:text-blue-700 mr-2" title="Logout"
               />
             <button 
