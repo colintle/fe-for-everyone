@@ -1,25 +1,41 @@
+export const parseToken = (token) => {
+  if (!token) {
+    return null;
+  }
+
+  try {
+    const [, payloadBase64] = token.split('.');
+    const payload = JSON.parse(atob(payloadBase64));
+
+    return payload;
+  } catch (error) {
+    console.error('Invalid token:', error);
+    return null;
+  }
+}
+
 export const checkExpired = (accessToken) => {
   if (!accessToken) {
     return true;
   }
 
-  try {
-    const [, payloadBase64] = accessToken.split('.');
-    const payload = JSON.parse(atob(payloadBase64));
+  const { exp } = parseToken(accessToken);
 
-    if (!payload.exp) {
-      return true;
-    }
+  return Date.now() >= exp * 1000;
+};
 
-    const currentTime = Math.floor(Date.now() / 1000);
-    return payload.exp < currentTime;
-  } catch (error) {
-    return true;
+export const getUsernameFromToken = (accessToken) => {
+  if (!accessToken) {
+    return null;
   }
+
+  const { username } = parseToken(accessToken);
+
+  return username;
 };
 
 export const refreshToken = async () => {
-  const refreshResponse = await fetch(`${process.env.BACKEND_URL}/refresh`, {
+  const refreshResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/refresh`, {
     method: 'GET',
     credentials: 'include',
   });
