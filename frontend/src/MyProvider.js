@@ -1,9 +1,11 @@
-import React, { useState, createContext } from 'react';
+import React, { useState, createContext, useEffect } from 'react';
+
+import { refreshToken, getUsernameFromToken } from './utils/token';
 
 const MyContext = createContext()
 
 function MyProvider({children}) {
-    const [loading, setLoading] = useState(true)
+    const [loading, setLoading] = useState(false)
     const [single, setSingle] = useState(false)
     const [multi, setMulti] = useState(false)
     const [username, setUsername] = useState("")
@@ -21,14 +23,32 @@ function MyProvider({children}) {
     const [logout, setLogout] = useState(false)
 
     const handleLogout = () => {
-        setLoading(true);
         setTimeout(() => {
           setLogout(true);
           setAccessToken("");
           setUsername("");
-          setLoading(false);
-        }, 1000); // Simulate a short delay before logging out
-      };
+
+          // call "signout" endpoint
+        }, 1000);
+    };
+
+    useEffect(() => {
+        const grabToken = async () => {
+            setLoading(true)
+            const token = await refreshToken()
+            if (token){
+                setAccessToken(token)
+                setUsername(getUsernameFromToken(token))
+                setLoading(false)
+            }
+            else {
+                handleLogout()
+            }
+        };
+
+        grabToken()
+    }, [])
+
     return (
         <MyContext.Provider 
             value={{single, setSingle, multi, setMulti, accessToken, setAccessToken, completedProblems, setCompletedProblems, logout, loading, setLoading, handleLogout, username, setUsername}}>
