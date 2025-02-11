@@ -12,7 +12,7 @@ import Form from './components/form/Form';
 import Join from "./components/multi/Join"
 import { MyContext } from './MyProvider';
 
-import checkExpired from './utils/token';
+import { checkExpired, refreshToken } from './utils/token';
 
 function App() {
   const isMobile = window.matchMedia("only screen and (max-width: 1024px), (max-height: 768px)").matches;
@@ -22,7 +22,6 @@ function App() {
   const location = useLocation()
 
   useEffect(() => {
-    console.log(accessToken)
     setLoading(true)  
     const expired = checkExpired(accessToken)
     if (logout || expired){
