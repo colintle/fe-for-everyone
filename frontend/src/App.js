@@ -12,27 +12,33 @@ import Form from './components/form/Form';
 import Join from "./components/multi/Join"
 import { MyContext } from './MyProvider';
 
-import { checkExpired, refreshToken } from './utils/token';
-
 function App() {
   const isMobile = window.matchMedia("only screen and (max-width: 1024px), (max-height: 768px)").matches;
   const [form, setForm] = useState(false)
   const [join, setJoin] = useState(false)
-  const {setSingle, setMulti, accessToken, setAccessToken, logout, loading, setLoading} = useContext(MyContext)
+  const {setSingle, setMulti, logout, handleLogout, loading, setLoading, accessToken} = useContext(MyContext)
   const location = useLocation()
 
   useEffect(() => {
-    setLoading(true)  
-    const expired = checkExpired(accessToken)
-    if (logout || expired){
-      setForm(true)
-      setAccessToken("")
+    const renderForm = () => { 
+      if (logout){
+        setForm(true)
+      }
+      else{
+        setForm(false)
+      }
+
+      setLoading(false)
     }
-    else{
+    renderForm()
+
+  }, [logout, handleLogout, setLoading])
+
+  useEffect(() => {
+    if (accessToken){
       setForm(false)
     }
-    setLoading(false)
-  }, [accessToken, setAccessToken, setLoading, logout])
+  }, [accessToken])
 
   useEffect(() => {
     const handlePopState = () => {
