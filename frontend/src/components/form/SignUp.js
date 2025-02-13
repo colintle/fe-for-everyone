@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { IoIosEye, IoIosEyeOff } from "react-icons/io";
-import { MyContext } from '../../MyProvider';
 
+import { MyContext } from '../../MyProvider';
 import { useApi } from '../../utils/api/useApi';
 import { POST } from '../../utils/api/methods';
 
