@@ -5,7 +5,7 @@ import { refreshToken, getUsernameFromToken } from './utils/token';
 const MyContext = createContext()
 
 function MyProvider({children}) {
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
     const [single, setSingle] = useState(false)
     const [multi, setMulti] = useState(false)
     const [username, setUsername] = useState("")
@@ -23,6 +23,7 @@ function MyProvider({children}) {
     const [logout, setLogout] = useState(false)
 
     const handleLogout = () => {
+        console.log("inside handleLogout")
         setTimeout(() => {
           setLogout(true);
           setAccessToken("");
