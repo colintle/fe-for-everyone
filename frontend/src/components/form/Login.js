@@ -1,18 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { IoIosEye, IoIosEyeOff } from "react-icons/io";
+
+import { MyContext } from '../../MyProvider';
+import { useApi } from '../../utils/api/useApi';
+import { POST } from '../../utils/api/methods';
 
 function Login() {
   const [showPassword, setPassword] = useState(false);
   const [errors, setErrors] = useState({});
+  const {setUsername, setAccessToken, setLoading} = useContext(MyContext);
+  const { callApi } = useApi();
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
+
+    setLoading(true);
 
     const formErrors = {};
     const email = event.target.email.value.trim();
     const password = event.target.password.value.trim();
 
-    // Example validation
     if (!email) {
       formErrors.email = "Email is required";
     }
@@ -23,13 +30,24 @@ function Login() {
     setErrors(formErrors);
 
     if (Object.keys(formErrors).length === 0) {
-      // Proceed with form submission or further validation
-      console.log('Form submitted');
+      const data = await callApi('/login', POST, { username: email, password });
+        if (data?.error) {
+          formErrors.form = data.error;
+          setErrors(formErrors);
+        }
+        else{
+          const { token, username } = data;
+          setAccessToken(token);
+          setUsername(username);
+      }
     }
+
+    setLoading(false);
   };
 
   return (
     <div className="max-w-md mx-auto">
+      {errors.form && <p className="text-red-500 text-center mb-4">{errors.form}</p>}
       <div className="flex justify-center mb-4">
         <img src="/logo.png" alt="Logo" className="h-24 w-auto" />
       </div>
