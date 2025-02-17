@@ -16,23 +16,20 @@ function App() {
   const isMobile = window.matchMedia("only screen and (max-width: 1024px), (max-height: 768px)").matches;
   const [form, setForm] = useState(false)
   const [join, setJoin] = useState(false)
-  const {setSingle, setMulti, logout, handleLogout, loading, setLoading, accessToken} = useContext(MyContext)
+  const {setSingle, setMulti, logout, handleLogout, loading, accessToken} = useContext(MyContext)
   const location = useLocation()
 
   useEffect(() => {
-    const renderForm = () => { 
+    const renderForm = () => {
       if (logout){
         setForm(true)
       }
       else{
         setForm(false)
       }
-
-      setLoading(false)
     }
     renderForm()
-
-  }, [logout, handleLogout, setLoading])
+  }, [logout, handleLogout])
 
   useEffect(() => {
     if (accessToken){
