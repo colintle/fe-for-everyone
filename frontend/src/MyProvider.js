@@ -23,32 +23,36 @@ function MyProvider({children}) {
     const [logout, setLogout] = useState(false)
 
     const handleLogout = () => {
-        console.log("inside handleLogout")
-        setTimeout(() => {
-          setLogout(true);
-          setAccessToken("");
-          setUsername("");
-
-          // call "signout" endpoint
-        }, 1000);
-    };
-
-    useEffect(() => {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            setLogout(true);
+            setAccessToken("");
+            setUsername("");
+      
+            // call "signout" endpoint if needed
+      
+            resolve();
+          }, 1000);
+        });
+      };
+      
+      useEffect(() => {
         const grabToken = async () => {
-            setLoading(true)
-            const token = await refreshToken()
-            if (token){
-                setAccessToken(token)
-                setUsername(getUsernameFromToken(token))
-                setLoading(false)
-            }
-            else {
-                handleLogout()
-            }
+          setLoading(true);
+          const token = await refreshToken();
+          if (token) {
+            setAccessToken(token);
+            setUsername(getUsernameFromToken(token));
+            setLoading(false);
+          } else {
+            await handleLogout();
+            setLoading(false);
+          }
         };
-
-        grabToken()
-    }, [])
+      
+        grabToken();
+      }, []);
+      
 
     return (
         <MyContext.Provider 
