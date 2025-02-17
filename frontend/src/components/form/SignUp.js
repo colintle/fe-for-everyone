@@ -8,7 +8,7 @@ import { POST } from '../../utils/api/methods';
 function SignUp() {
   const [showPassword, setPassword] = useState(false);
   const [errors, setErrors] = useState({});
-  const {setUsername, setAccessToken, setLoading} = useContext(MyContext);
+  const { setUsername, setAccessToken, setLoading } = useContext(MyContext);
   const { callApi } = useApi();
 
   const handleSubmit = async (event) => {
@@ -52,24 +52,22 @@ function SignUp() {
     setErrors(formErrors);
 
     if (Object.keys(formErrors).length === 0) {
-        const data = await callApi('/register', POST, { name, username: email, password });
-        if (data?.error) {
-          formErrors.form = data.error;
-          setErrors(formErrors);
-        }
-        else{
-          const { token, username } = data;
-          setAccessToken(token);
-          setUsername(username);
-        }
+      const data = await callApi('/register', POST, { name, username: email, password });
+      if (data?.error) {
+        const serverErrors = {};
+        serverErrors.form = data.error;
+        setErrors(serverErrors);
+      } else {
+        const { token, username } = data;
+        setAccessToken(token);
+        setUsername(username);
+      }
     }
-    
     setLoading(false);
   };
 
   return (
     <div className="max-w-md mx-auto">
-      {errors.form && <p className="text-red-500 text-center mb-4">{errors.form}</p>}
       <div className="flex justify-center mb-4">
         <img src="/logo.png" alt="Logo" className="h-24 w-auto" />
       </div>
@@ -78,7 +76,7 @@ function SignUp() {
         <div className="mb-4">
           <label
             htmlFor="name"
-            className={`block mb-2 ${errors.name ? 'text-red-500' : 'text-gray-700'}`}
+            className={`block mb-2 ${errors?.name || errors?.form ? 'text-red-500' : 'text-gray-700'}`}
           >
             Name
           </label>
@@ -87,16 +85,16 @@ function SignUp() {
             id="name"
             name="name"
             className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
-              errors.name ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-600'
+              errors?.name || errors?.form ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-600'
             }`}
             placeholder="Enter your name"
           />
-          {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+          {errors?.name && <p className="text-red-500 text-xs mt-1">{errors?.name}</p>}
         </div>
         <div className="mb-4">
           <label
             htmlFor="email"
-            className={`block mb-2 ${errors.email ? 'text-red-500' : 'text-gray-700'}`}
+            className={`block mb-2 ${errors?.email || errors?.form ? 'text-red-500' : 'text-gray-700'}`}
           >
             Email
           </label>
@@ -105,16 +103,16 @@ function SignUp() {
             id="email"
             name="email"
             className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
-              errors.email ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-600'
+              errors?.email || errors?.form ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-600'
             }`}
             placeholder="example.email@gmail.com"
           />
-          {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+          {errors?.email && <p className="text-red-500 text-xs mt-1">{errors?.email}</p>}
         </div>
         <div className="mb-6">
           <label
             htmlFor="password"
-            className={`block mb-2 ${errors.password ? 'text-red-500' : 'text-gray-700'}`}
+            className={`block mb-2 ${errors?.password || errors?.form ? 'text-red-500' : 'text-gray-700'}`}
           >
             Password
           </label>
@@ -124,7 +122,7 @@ function SignUp() {
               id="password"
               name="password"
               className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
-                errors.password ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-600'
+                errors?.password || errors?.form ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-600'
               }`}
               placeholder="Enter your password"
             />
@@ -133,10 +131,10 @@ function SignUp() {
               onClick={() => setPassword(!showPassword)}
               className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-600"
             >
-              {!showPassword ? <IoIosEye className="h-5 w-5"/> : <IoIosEyeOff className="h-5 w-5"/>}
+              {!showPassword ? <IoIosEye className="h-5 w-5" /> : <IoIosEyeOff className="h-5 w-5" />}
             </button>
           </div>
-          {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
+          {errors?.password && <p className="text-red-500 text-xs mt-1">{errors?.password}</p>}
           <div className="mt-2 text-gray-400 text-sm">
             <p>Password must:</p>
             <ul className="list-disc list-inside">
@@ -155,6 +153,7 @@ function SignUp() {
         >
           Sign Up
         </button>
+        {errors?.form && <p className="text-red-500 text-center mb-4">{errors?.form}</p>}
       </form>
     </div>
   );
