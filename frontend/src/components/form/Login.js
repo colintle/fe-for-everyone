@@ -32,8 +32,9 @@ function Login() {
     if (Object.keys(formErrors).length === 0) {
       const data = await callApi('/login', POST, { username: email, password });
         if (data?.error) {
-          formErrors.form = data.error;
-          setErrors(formErrors);
+          const serverErrors = {};
+          serverErrors.form = data.error;
+          setErrors(serverErrors);
         }
         else{
           const { token, username } = data;
@@ -41,13 +42,10 @@ function Login() {
           setUsername(username);
       }
     }
-
     setLoading(false);
   };
-
   return (
     <div className="max-w-md mx-auto">
-      {errors.form && <p className="text-red-500 text-center mb-4">{errors.form}</p>}
       <div className="flex justify-center mb-4">
         <img src="/logo.png" alt="Logo" className="h-24 w-auto" />
       </div>
@@ -56,7 +54,7 @@ function Login() {
         <div className="mb-4">
           <label
             htmlFor="email"
-            className={`block mb-2 ${errors.email ? 'text-red-500' : 'text-gray-700'}`}
+            className={`block mb-2 ${errors?.email ? 'text-red-500' : 'text-gray-700'}`}
           >
             Email
           </label>
@@ -65,16 +63,18 @@ function Login() {
             id="email"
             name="email"
             className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
-              errors.email ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-600'
+              errors?.email || errors?.form
+                ? 'border-red-500 focus:ring-red-500'
+                : 'border-gray-300 focus:ring-blue-600'
             }`}
             placeholder="example.email@gmail.com"
           />
-          {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+          {errors?.email && <p className="text-red-500 text-xs mt-1">{errors?.email}</p>}
         </div>
         <div className="mb-6">
           <label
             htmlFor="password"
-            className={`block mb-2 ${errors.password ? 'text-red-500' : 'text-gray-700'}`}
+            className={`block mb-2 ${errors?.password ? 'text-red-500' : 'text-gray-700'}`}
           >
             Password
           </label>
@@ -84,7 +84,9 @@ function Login() {
               id="password"
               name="password"
               className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
-                errors.password ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-600'
+                errors?.password || errors?.form
+                  ? 'border-red-500 focus:ring-red-500'
+                  : 'border-gray-300 focus:ring-blue-600'
               }`}
               placeholder="Enter your password"
             />
@@ -96,7 +98,7 @@ function Login() {
               {!showPassword ? <IoIosEye className="h-5 w-5"/> : <IoIosEyeOff className="h-5 w-5"/>}
             </button>
           </div>
-          {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
+          {errors?.password && <p className="text-red-500 text-xs mt-1">{errors?.password}</p>}
         </div>
         <button
           type="submit"
@@ -104,6 +106,7 @@ function Login() {
         >
           Login
         </button>
+        {errors?.form && <p className="text-red-500 text-center mb-4">{errors?.form}</p>}
       </form>
     </div>
   );
