@@ -46,7 +46,7 @@ export const useApi = () => {
         }
       }
 
-      return response.ok ?  data : { error: data.message || 'Request failed, please try again.' };
+      return response.ok ?  data : { error: data.message || 'Please try again.' };
 
     } catch (error) {
       return { error: 'An error occurred. Please try again.' };
