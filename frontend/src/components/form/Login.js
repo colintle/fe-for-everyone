@@ -17,12 +17,13 @@ function Login() {
     setLoading(true);
 
     const formErrors = {};
-    const email = event.target.email.value.trim();
+    const username = event.target.username.value.trim();
     const password = event.target.password.value.trim();
 
-    if (!email) {
-      formErrors.email = "Email is required";
+    if (!username) {
+      formErrors.username = "Username is required";
     }
+
     if (!password) {
       formErrors.password = "Password is required";
     }
@@ -30,7 +31,7 @@ function Login() {
     setErrors(formErrors);
 
     if (Object.keys(formErrors).length === 0) {
-      const data = await callApi('/login', POST, { username: email, password });
+      const data = await callApi('/login', POST, { username, password });
         if (data?.error) {
           const serverErrors = {};
           serverErrors.form = data.error;
@@ -53,23 +54,23 @@ function Login() {
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <label
-            htmlFor="email"
-            className={`block mb-2 ${errors?.email ? 'text-red-500' : 'text-gray-700'}`}
+            htmlFor="username"
+            className={`block mb-2 ${errors?.username ? 'text-red-500' : 'text-gray-700'}`}
           >
-            Email
+            Username
           </label>
           <input
-            type="email"
-            id="email"
-            name="email"
+            type="text"
+            id="username"
+            name="username"
             className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
-              errors?.email || errors?.form
+              errors?.username || errors?.form
                 ? 'border-red-500 focus:ring-red-500'
                 : 'border-gray-300 focus:ring-blue-600'
             }`}
-            placeholder="example.email@gmail.com"
+            placeholder="Enter your username"
           />
-          {errors?.email && <p className="text-red-500 text-xs mt-1">{errors?.email}</p>}
+          {errors?.username && <p className="text-red-500 text-xs mt-1">{errors?.username}</p>}
         </div>
         <div className="mb-6">
           <label
