@@ -1,6 +1,6 @@
 import React, { useState, createContext, useEffect } from 'react';
 
-import { refreshToken, getUsernameFromToken } from './utils/token';
+import { refreshToken, getUsernameFromToken, clearToken } from './utils/token';
 
 const MyContext = createContext()
 
@@ -21,37 +21,42 @@ function MyProvider({children}) {
     ])
     const [accessToken, setAccessToken] = useState("")
     const [logout, setLogout] = useState(false)
-
-    const handleLogout = () => {
-        return new Promise((resolve) => {
-          setTimeout(() => {
-            setLogout(true);
-            setAccessToken("");
-            setUsername("");
       
-            // call "signout" endpoint if needed
-      
-            resolve();
-          }, 1000);
-        });
+    const handleLogout = async () => {
+      try {
+        const cleared = await clearToken();
+        if (!cleared) {
+          throw new Error("Failed to clear token");
+        }
+        
+        setLogout(true);
+        setAccessToken("");
+        setUsername("");
+    
+        return true;
+      } catch (error) {
+        throw error;
+      }
+    };
+    
+    
+    useEffect(() => {
+      const grabToken = async () => {
+        setLoading(true);
+        const token = await refreshToken();
+        if (token) {
+          setAccessToken(token);
+          setUsername(getUsernameFromToken(token));
+          setLoading(false);
+        } else {
+          await handleLogout();
+          setLoading(false);
+        }
       };
-      
-      useEffect(() => {
-        const grabToken = async () => {
-          setLoading(true);
-          const token = await refreshToken();
-          if (token) {
-            setAccessToken(token);
-            setUsername(getUsernameFromToken(token));
-            setLoading(false);
-          } else {
-            await handleLogout();
-            setLoading(false);
-          }
-        };
-      
-        grabToken();
-      }, []);
+    
+      grabToken();
+      // eslint-disable-next-line
+    }, []);
       
 
     return (
