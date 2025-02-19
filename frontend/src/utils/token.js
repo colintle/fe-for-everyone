@@ -48,3 +48,17 @@ export const refreshToken = async () => {
     return false;
   }
 }
+
+export const clearToken = async () => {
+  const signoutResponse  = await fetch(`${process.env.REACT_APP_BACKEND_URL}/signout`, {
+    method: 'DELETE',
+    credentials: 'include',
+  });
+
+  if (signoutResponse.ok) {
+    return true;
+  } 
+  else {
+    return false;
+  }
+}
