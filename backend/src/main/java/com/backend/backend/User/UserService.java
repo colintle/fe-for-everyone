@@ -48,9 +48,7 @@ public class UserService {
 
         User user = userRepository.findUserByUsername(request.getUsername()).orElseThrow();
         String token = jwtService.generateToken(user, 24*60*60*1000, false);
-        // String refreshToken = jwtService.generateToken(user, 7*24*60*60*1000, true);
-        String refreshToken = jwtService.generateToken(user, 1000, true);
-        // CookieUtils.create(response, "refreshToken", refreshToken, true, 86400 * 7); // 7 days and secure
+        String refreshToken = jwtService.generateToken(user, 7*24*60*60*1000, true);
         CookieUtils.create(response, "refreshToken", refreshToken, true, 86400 * 7); // 7 days and secure
 
 
