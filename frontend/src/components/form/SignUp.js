@@ -18,14 +18,14 @@ function SignUp() {
 
     const formErrors = {};
     const name = event.target.name.value.trim();
-    const email = event.target.email.value.trim();
+    const username = event.target.username.value.trim();
     const password = event.target.password.value.trim();
 
     if (!name) {
       formErrors.name = "Name is required";
     }
-    if (!email) {
-      formErrors.email = "Email is required";
+    if (!username) {
+      formErrors.username = "Username is required";
     }
     if (!password) {
       formErrors.password = "Password is required";
@@ -52,7 +52,7 @@ function SignUp() {
     setErrors(formErrors);
 
     if (Object.keys(formErrors).length === 0) {
-      const data = await callApi('/register', POST, { name, username: email, password });
+      const data = await callApi('/register', POST, { name, username, password });
       if (data?.error) {
         const serverErrors = {};
         serverErrors.form = data.error;
@@ -93,21 +93,21 @@ function SignUp() {
         </div>
         <div className="mb-4">
           <label
-            htmlFor="email"
-            className={`block mb-2 ${errors?.email || errors?.form ? 'text-red-500' : 'text-gray-700'}`}
+            htmlFor="username"
+            className={`block mb-2 ${errors?.username || errors?.form ? 'text-red-500' : 'text-gray-700'}`}
           >
-            Email
+            Username
           </label>
           <input
-            type="email"
-            id="email"
-            name="email"
+            type="text"
+            id="username"
+            name="username"
             className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
-              errors?.email || errors?.form ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-600'
+              errors?.username || errors?.form ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-600'
             }`}
-            placeholder="example.email@gmail.com"
+            placeholder="Enter your username"
           />
-          {errors?.email && <p className="text-red-500 text-xs mt-1">{errors?.email}</p>}
+          {errors?.username && <p className="text-red-500 text-xs mt-1">{errors?.username}</p>}
         </div>
         <div className="mb-6">
           <label
