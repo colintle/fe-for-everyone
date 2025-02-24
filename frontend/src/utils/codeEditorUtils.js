@@ -102,7 +102,7 @@ export function handleOpenModal(setModalFn) {
 }
 
 async function completeProblem(problemStatementPath){
-  const response = await callApi(`/complete`, 'POST', { problemStatementPath });
+  const response = await callApi(`/problem/complete`, 'POST', { problemStatementPath });
 
   if (response.ok){
     return true;
@@ -111,4 +111,14 @@ async function completeProblem(problemStatementPath){
     return false;
   }
 }
-  
+
+async function uncompleteProblem(problemStatementPath){
+  const response = await callApi(`/problem/remove`, 'POST', { problemStatementPath });
+
+  if (response.ok){
+    return true;
+  }
+  else {
+    return false;
+  }
+}
