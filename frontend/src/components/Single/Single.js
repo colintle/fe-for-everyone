@@ -8,7 +8,7 @@ import Loading from '../Loading';
 import Download from '../Download';
 
 import { MyContext } from '../../MyProvider';
-import { useCodeHandlers } from '../../utils/useCodeHandlers';
+import { useCodeHandlers } from '../../utils/code/useCodeHandlers';
 
 function Single({ problem, completed }) {
   const [isCompleted, setIsCompleted] = useState(completed);

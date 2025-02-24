@@ -1,10 +1,9 @@
-import { useCallback } from 'react';
-import { useApi} from './api/useApi'
+import { useCodeApiCalls } from './useCodeApiCalls';
 
 export const useCodeHandlers = () => {
-  const { callApi } = useApi();
+  const { completeProblem, uncompleteProblem } = useCodeApiCalls();
 
-  const handleToggleCompletion = useCallback(
+  const handleToggleCompletion =
     async ({
       isCompleted,
       setIsCompleted,
@@ -45,11 +44,9 @@ export const useCodeHandlers = () => {
       } finally {
         setLoading(false);
       }
-    },
-    []
-  );
+  }
 
-  const handleStartStopTimer = useCallback(
+  const handleStartStopTimer =
     ({ isRunning, setIsRunning, timeLeft, setTimeLeft, setLoading }) => {
       setLoading(true);
 
@@ -60,11 +57,9 @@ export const useCodeHandlers = () => {
         setIsRunning(!isRunning);
         setLoading(false);
       }, 1000);
-    },
-    []
-  );
+  }
 
-  const handleRunCode = useCallback(
+  const handleRunCode =
     ({ setLoading, editorContent, setOutput }) => {
       setLoading(true);
 
@@ -74,22 +69,18 @@ export const useCodeHandlers = () => {
         );
         setLoading(false);
       }, 2000);
-    },
-    []
-  );
+  }
 
-  const handleExit = useCallback(
+  const handleExit =
     ({ setLoading, navigate }) => {
       setLoading(true);
 
       setTimeout(() => {
         navigate('/');
       }, 1000);
-    },
-    []
-  );
+    }
 
-  const handleDownload = useCallback(
+  const handleDownload =
     ({ filename, editorContent, setLoading, setDownloadModal }) => {
       setLoading(true);
       setDownloadModal(false);
@@ -104,29 +95,11 @@ export const useCodeHandlers = () => {
         document.body.removeChild(element);
         setLoading(false);
       }, 2000);
-    },
-    []
-  );
+    }
 
-  const handleOpenModal = useCallback((setModalFn) => {
+  const handleOpenModal = (setModalFn) => {
     setModalFn(true);
-  }, []);
-
-  const completeProblem = async (problemStatementPath) => {
-    const response = await callApi(`/problem/complete`, 'POST', { problemStatementPath });
-    if (response?.error) {
-      return false;
-    }
-    return true
-  };
-
-  const uncompleteProblem = async (problemStatementPath) => {
-    const response = await callApi(`/problem/remove`, 'POST', { problemStatementPath });
-    if (response?.error) {
-      return false;
-    }
-    return true
-  };
+  }
 
   return {
     handleToggleCompletion,

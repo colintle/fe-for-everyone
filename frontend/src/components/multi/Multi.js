@@ -11,7 +11,7 @@ import Members from './Members';
 
 import { MyContext } from '../../MyProvider';
 
-import { useCodeHandlers } from '../../utils/useCodeHandlers';
+import { useCodeHandlers } from '../../utils/code/useCodeHandlers';
 
 function Multi({ problem, completed, inviteCode }) {
   const [isCompleted, setIsCompleted] = useState(completed);
