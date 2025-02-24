@@ -44,8 +44,6 @@ function Home() {
 
   const handleSubmit = () => {
     // Here you would normally submit the data to an API or handle it as needed.
-    console.log('Submitted data:', formData);
-
     if (formData.mode === "Single"){
       setSingle(formData)
       navigate("/code")

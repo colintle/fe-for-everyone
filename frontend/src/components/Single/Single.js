@@ -8,24 +8,25 @@ import Loading from '../Loading';
 import Download from '../Download';
 
 import { MyContext } from '../../MyProvider';
-
-import {
-  handleToggleCompletion,
-  handleStartStopTimer,
-  handleRunCode,
-  handleExit,
-  handleDownload,
-  handleOpenModal
-} from '../../utils/codeEditorUtils';
+import { useCodeHandlers } from '../../utils/useCodeHandlers';
 
 function Single({ problem, completed }) {
   const [isCompleted, setIsCompleted] = useState(completed);
   const [loading, setLoading] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(7200); // 2 hours in seconds
+  const [timeLeft, setTimeLeft] = useState(7200);
   const [isRunning, setIsRunning] = useState(false);
   const [output, setOutput] = useState("Run code to see output!"); 
   const [editorContent, setEditorContent] = useState("");
   const [downloadModal, setDownloadModal] = useState(false);
+
+  const {
+    handleToggleCompletion,
+    handleStartStopTimer,
+    handleRunCode,
+    handleExit,
+    handleDownload,
+    handleOpenModal,
+  } = useCodeHandlers();
 
   const { completedProblems, setCompletedProblems } = useContext(MyContext);
   

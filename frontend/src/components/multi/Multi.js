@@ -11,13 +11,7 @@ import Members from './Members';
 
 import { MyContext } from '../../MyProvider';
 
-import {
-  handleToggleCompletion,
-  handleRunCode,
-  handleExit,
-  handleDownload,
-  handleOpenModal,
-} from '../../utils/codeEditorUtils';
+import { useCodeHandlers } from '../../utils/useCodeHandlers';
 
 function Multi({ problem, completed, inviteCode }) {
   const [isCompleted, setIsCompleted] = useState(completed);
@@ -32,6 +26,14 @@ function Multi({ problem, completed, inviteCode }) {
 
   const { completedProblems, setCompletedProblems } = useContext(MyContext);
   const navigate = useNavigate();
+
+  const {
+    handleToggleCompletion,
+    handleRunCode,
+    handleExit,
+    handleDownload,
+    handleOpenModal, 
+  } = useCodeHandlers()
 
   const onToggleCompletion = () => {
     handleToggleCompletion({
