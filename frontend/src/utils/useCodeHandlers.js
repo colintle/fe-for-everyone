@@ -114,12 +114,18 @@ export const useCodeHandlers = () => {
 
   const completeProblem = async (problemStatementPath) => {
     const response = await callApi(`/problem/complete`, 'POST', { problemStatementPath });
-    return response.ok;
+    if (response?.error) {
+      return false;
+    }
+    return true
   };
 
   const uncompleteProblem = async (problemStatementPath) => {
     const response = await callApi(`/problem/remove`, 'POST', { problemStatementPath });
-    return response.ok;
+    if (response?.error) {
+      return false;
+    }
+    return true
   };
 
   return {
