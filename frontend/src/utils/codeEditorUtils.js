@@ -1,3 +1,7 @@
+import { useApi } from "./api/useApi";
+
+const {callApi} = useApi();
+
 export function handleToggleCompletion({
     isCompleted,
     setIsCompleted,
@@ -95,5 +99,16 @@ export function handleDownload({
 
 export function handleOpenModal(setModalFn) {
     setModalFn(true);
+}
+
+async function completeProblem(problemStatementPath){
+  const response = await callApi(`/complete`, 'POST', { problemStatementPath });
+
+  if (response.ok){
+    return true;
+  }
+  else {
+    return false;
+  }
 }
   
