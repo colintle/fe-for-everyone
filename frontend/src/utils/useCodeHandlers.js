@@ -5,36 +5,46 @@ export const useCodeHandlers = () => {
   const { callApi } = useApi();
 
   const handleToggleCompletion = useCallback(
-    ({
+    async ({
       isCompleted,
       setIsCompleted,
       setLoading,
       completedProblems,
       setCompletedProblems,
-      problem
+      problem,
     }) => {
       setLoading(true);
-
-      setTimeout(() => {
+      try {
+        let success = false;
         if (!isCompleted) {
-          setCompletedProblems([
-            ...completedProblems,
-            {
-              problemStatementPath: problem,
-              date: new Date().toISOString().split('T')[0],
-            },
-          ]);
+          success = await completeProblem(problem);
         } else {
-          setCompletedProblems(
-            completedProblems.filter(
-              (problemItem) => problemItem.problemStatementPath !== problem
-            )
-          );
+          success = await uncompleteProblem(problem);
         }
-
-        setIsCompleted(!isCompleted);
+  
+        if (success) {
+          if (!isCompleted) {
+            setCompletedProblems([
+              ...completedProblems,
+              {
+                problemStatementPath: problem,
+                date: new Date().toISOString().split('T')[0],
+              },
+            ]);
+          } else {
+            setCompletedProblems(
+              completedProblems.filter(
+                (problemItem) => problemItem.problemStatementPath !== problem
+              )
+            );
+          }
+          setIsCompleted(!isCompleted);
+        }
+      } catch (error) {
+        console.error('Error toggling completion:', error);
+      } finally {
         setLoading(false);
-      }, 1000);
+      }
     },
     []
   );

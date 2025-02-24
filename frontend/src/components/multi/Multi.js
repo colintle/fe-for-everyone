@@ -35,8 +35,8 @@ function Multi({ problem, completed, inviteCode }) {
     handleOpenModal, 
   } = useCodeHandlers()
 
-  const onToggleCompletion = () => {
-    handleToggleCompletion({
+  const onToggleCompletion = async () => {
+    return await handleToggleCompletion({
       isCompleted,
       setIsCompleted,
       setLoading,

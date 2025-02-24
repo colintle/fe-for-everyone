@@ -44,8 +44,8 @@ function Single({ problem, completed }) {
     }
   }, [isRunning, timeLeft]);
 
-  const onToggleCompletion = () => {
-    handleToggleCompletion({
+  const onToggleCompletion = async () => {
+    return await handleToggleCompletion({
       isCompleted,
       setIsCompleted,
       setLoading,
