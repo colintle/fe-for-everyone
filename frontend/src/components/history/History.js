@@ -1,12 +1,26 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { HiMiniArrowSmallLeft, HiMiniArrowSmallRight } from "react-icons/hi2";
 import { MyContext } from '../../MyProvider';
 
+import { useCodeApiCalls } from '../../utils/code/useCodeApiCalls';
+
 function History() {
-  const { completedProblems } = useContext(MyContext);
+  const { completedProblems, setCompletedProblems, accessToken } = useContext(MyContext);
+  const { getCompletedProblems } = useCodeApiCalls();
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
+
+  useEffect(() => {
+    const fetchCompletedProblems = async () => {
+      const response = await getCompletedProblems();
+      if (response) {
+        setCompletedProblems(response.problems);
+      }
+    };
+
+    fetchCompletedProblems();
+  }, [accessToken, getCompletedProblems, setCompletedProblems]);
 
   const filteredProblems = completedProblems.filter(problem =>
     problem.problemStatementPath.toLowerCase().includes(searchTerm.toLowerCase()) ||
