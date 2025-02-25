@@ -9,16 +9,7 @@ function MyProvider({children}) {
     const [single, setSingle] = useState(false)
     const [multi, setMulti] = useState(false)
     const [username, setUsername] = useState("")
-    const [completedProblems, setCompletedProblems] = useState([
-        {
-            "problemStatementPath": "Fall 2022",
-            "date": "2023-08-12"
-        },
-        {
-            "problemStatementPath": "Spring 2022",
-            "date": "2023-08-13"
-        }
-    ])
+    const [completedProblems, setCompletedProblems] = useState([])
     const [accessToken, setAccessToken] = useState("")
     const [logout, setLogout] = useState(false)
       
