@@ -37,6 +37,7 @@ public class CodeController {
         try {
             ResponseEntity<Map> response = restTemplate.postForEntity(url, data, Map.class);
             Map<String, Object> responseBody = response.getBody();
+            Map<String, String> result = new HashMap<>();
 
             if (responseBody != null && responseBody.containsKey("run")) {
                 Map<String, Object> runResult = (Map<String, Object>) responseBody.get("run");
@@ -50,17 +51,23 @@ public class CodeController {
                 }
 
                 if (stderr != null && !stderr.isEmpty()) {
-                    return ResponseEntity.ok(stderr);
+                    result.put("output", stderr);
+                    return ResponseEntity.ok(result);
                 } else if (stdout != null && !stdout.isEmpty()) {
-                    return ResponseEntity.ok(stdout);
+                    result.put("output", stdout);
+                    return ResponseEntity.ok(result);
                 } else {
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while executing the code");
+                    result.put("output", "An error occurred while executing the code");
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
                 }
             } else {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while executing the code");
+                result.put("output", "An error occurred while executing the code");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
             }
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while executing the code");
+            Map<String, String> result = new HashMap<>();
+            result.put("output", "An error occurred while executing the code");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
         }
     }
 }
