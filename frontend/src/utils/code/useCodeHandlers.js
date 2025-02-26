@@ -1,7 +1,7 @@
 import { useCodeApiCalls } from './useCodeApiCalls';
 
 export const useCodeHandlers = () => {
-  const { completeProblem, uncompleteProblem } = useCodeApiCalls();
+  const { completeProblem, uncompleteProblem, runCode } = useCodeApiCalls();
 
   const handleToggleCompletion =
     async ({
@@ -56,19 +56,20 @@ export const useCodeHandlers = () => {
         }
         setIsRunning(!isRunning);
         setLoading(false);
-      }, 1000);
+      }, 1000) 
   }
 
   const handleRunCode =
-    ({ setLoading, editorContent, setOutput }) => {
+   async ({ setLoading, editorContent, setOutput }) => {
       setLoading(true);
-
-      setTimeout(() => {
-        setOutput(
-          `Code executed successfully! Here is the output:\n${editorContent}`
-        );
-        setLoading(false);
-      }, 2000);
+      const output = await runCode(editorContent);
+      if (output){
+        setOutput(output);
+      }
+      else {
+        setOutput('Error running code!');
+      }
+      setLoading(false);
   }
 
   const handleExit =
