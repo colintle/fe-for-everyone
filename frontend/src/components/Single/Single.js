@@ -16,7 +16,7 @@ function Single({ problem, completed }) {
   const [timeLeft, setTimeLeft] = useState(7200);
   const [isRunning, setIsRunning] = useState(false);
   const [output, setOutput] = useState("Run code to see output!"); 
-  const [editorContent, setEditorContent] = useState("");
+  const [editorContent, setEditorContent] = useState(`#include <stdio.h>\n\nint main() {\n    printf("Hello, World!\\n");\n    return 0;\n}`);
   const [downloadModal, setDownloadModal] = useState(false);
 
   const {
@@ -108,7 +108,7 @@ function Single({ problem, completed }) {
       <div className="grid grid-cols-2 gap-2 flex-grow h-5/6">
         <PdfViewer problem={problem} isRunning={isRunning} />
         <div className="flex flex-col gap-2">
-          <CodeEditor isRunning={isRunning} setEditorContent={setEditorContent} />
+          <CodeEditor isRunning={isRunning} editorContent={editorContent} setEditorContent={setEditorContent} />
           <CodeOutput output={output} />
         </div>
       </div>
