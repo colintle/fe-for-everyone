@@ -18,7 +18,7 @@ function Multi({ problem, completed, inviteCode }) {
   const [loading, setLoading] = useState(false);
   const isRunning = true;
   const [output, setOutput] = useState("Run code to see output!");
-  const [editorContent, setEditorContent] = useState("");
+  const [editorContent, setEditorContent] = useState(`#include <stdio.h>\n\nint main() {\n    printf("Hello, World!\\n");\n    return 0;\n}`);
 
   const [downloadModal, setDownloadModal] = useState(false);
   const [inviteModal, setInviteModal] = useState(false);
@@ -101,7 +101,7 @@ function Multi({ problem, completed, inviteCode }) {
       <div className="grid grid-cols-2 gap-2 flex-grow h-5/6">
         <PdfViewer problem={problem} isRunning={isRunning} />
         <div className="flex flex-col gap-2">
-          <CodeEditor isRunning={isRunning} setEditorContent={setEditorContent} />
+          <CodeEditor isRunning={isRunning} editorContent={editorContent} setEditorContent={setEditorContent} />
           <CodeOutput output={output} />
         </div>
       </div>
