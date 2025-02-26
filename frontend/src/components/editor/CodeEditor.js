@@ -1,20 +1,22 @@
 import React, { useEffect } from 'react';
 import { EditorView, minimalSetup } from "codemirror";
+import { keymap, lineNumbers } from "@codemirror/view";
+import { indentWithTab } from '@codemirror/commands';
 import { StreamLanguage } from "@codemirror/language";
 import { c } from "@codemirror/legacy-modes/mode/clike";
-import { lineNumbers } from "@codemirror/view";
 import { EditorState } from "@codemirror/state";
 
-function CodeEditor({ isRunning, setEditorContent }) {
+function CodeEditor({ isRunning, editorContent, setEditorContent }) {
   useEffect(() => {
     const editorParent = document.getElementById('editor');
     if (editorParent) {
       const view = new EditorView({
         extensions: [
-          minimalSetup, 
-          StreamLanguage.define(c), 
+          minimalSetup,
+          keymap.of([indentWithTab]),
+          StreamLanguage.define(c),
           lineNumbers(),
-          EditorState.readOnly.of(!isRunning), 
+          EditorState.readOnly.of(!isRunning),
           EditorView.updateListener.of((update) => {
             if (update.changes) {
               setEditorContent(update.state.doc.toString());
@@ -26,15 +28,16 @@ function CodeEditor({ isRunning, setEditorContent }) {
             ".cm-content": { fontSize: "16px" },
           }),
         ],
-        parent: editorParent, 
-        doc: `#include <stdio.h>\n\nint main() {\n    printf("Hello, World!\\n");\n    return 0;\n}`,
+        parent: editorParent,
+        doc: editorContent,
       });
 
       return () => {
         view.destroy();
       };
     }
-  }, [isRunning, setEditorContent]);
+  // eslint-disable-next-line
+  }, [isRunning]);
 
   return <div id="editor" className="border rounded overflow-auto" style={{ height: '43vh' }} />;
 }
