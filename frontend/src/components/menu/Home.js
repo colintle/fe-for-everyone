@@ -14,15 +14,16 @@ function Home() {
     exam: '',
     roomName: ''
   });
-  const {setSingle, setMulti} = useContext(MyContext)
-  const navigate = useNavigate()
+  const {setSingle, setMulti} = useContext(MyContext);
+  const navigate = useNavigate();
 
   const nextStep = () => setCurrentStep(currentStep + 1);
   const prevStep = () => setCurrentStep(currentStep - 1);
 
   useEffect(() => { 
-    setSingle(false)
-    setMulti(false)}, [setSingle, setMulti]
+    setSingle(false);
+    setMulti(false)}
+    , [setSingle, setMulti]
   )
 
   const handleModeSelection = (data) => {

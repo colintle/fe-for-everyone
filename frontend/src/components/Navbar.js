@@ -66,9 +66,9 @@ const Navbar = ({ setJoin }) => {
           <div className="flex items-center space-x-4">
               <CiLogout
                 onClick={async () => {
-                  setLoading(true)
-                  await handleLogout()
-                  setLoading(false)
+                  setLoading(true);
+                  await handleLogout();
+                  setLoading(false);
                 }
               }
                 className="text-blue-600 text-2xl cursor-pointer hover:text-blue-700 mr-2" title="Logout"
