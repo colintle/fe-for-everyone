@@ -1,24 +1,24 @@
-import { useApi } from "../api/useApi"
-import { GET, POST } from "../api/methods"
+import { useApi } from "../api/useApi";
+import { GET, POST } from "../api/methods";
 
 export const useCodeApiCalls = () => {
-    const { callApi } = useApi()
+    const { callApi } = useApi();
 
     const completeProblem = async (problemStatementPath) => {
         const response = await callApi(`/problem/complete`, POST, { problemStatementPath });
         if (response?.error) {
           return false;
         }
-        return true
-    };
+        return true;
+    } 
     
     const uncompleteProblem = async (problemStatementPath) => {
-        const response = await callApi(`/problem/remove`, POST, { problemStatementPath });
+        const response = await callApi(`/problem/remove`, POST, { problemStatementPath }); 
         if (response?.error) {
           return false;
         }
-        return true
-    };
+        return true;
+    } 
 
     const getCompletedProblems = async () => {
         const response = await callApi(`/problem/`, GET);
@@ -28,9 +28,18 @@ export const useCodeApiCalls = () => {
         return response;
     }
 
+    const runCode = async (code) => {
+        const response = await callApi(`/code/execute`, POST, { code });
+        if (response?.error) {
+          return null;
+        }
+        return response?.output;
+    }
+
     return {
         completeProblem,
         uncompleteProblem,
-        getCompletedProblems
-    }
-}
+        getCompletedProblems,
+        runCode
+    };
+};
