@@ -1,12 +1,14 @@
 import { useContext } from 'react';
 import { MyContext } from '../../MyProvider';
 
+import { GET } from './methods';
+
 import { refreshToken } from '../token';
 
 export const useApi = () => {
   const { accessToken, setAccessToken, handleLogout } = useContext(MyContext);
 
-  const callApi = async (endpoint, method = 'GET', payload = {}) => {
+  const callApi = async (endpoint, method = GET , payload = {}) => {
     try {
       const headers = {
         'Content-Type': 'application/json',
@@ -23,7 +25,7 @@ export const useApi = () => {
         method,
         headers,
         credentials: "include",
-        body: method !== 'GET' ? JSON.stringify(payload) : null,
+        body: method !== GET ? JSON.stringify(payload) : null,
       });
 
       const data = await response.json();
@@ -36,7 +38,7 @@ export const useApi = () => {
           setAccessToken(accessToken);
 
           headers['Authorization'] = `Bearer ${accessToken}`;
-          const retryResponse = await fetch(url, { method, headers, body: method !== 'GET' ? JSON.stringify(payload) : null });
+          const retryResponse = await fetch(url, { method, headers, body: method !== GET ? JSON.stringify(payload) : null });
           return await retryResponse.json();
 
         } 

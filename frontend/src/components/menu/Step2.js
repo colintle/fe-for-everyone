@@ -10,8 +10,8 @@ const generateExamOptions = () => {
       options.push({ value: `${season} ${year}` });
     }
   }
-  options.push({value: "Random"})
-  options = options.filter((key) => key.value !== "Fall 2024")
+  options.push({value: "Random"});
+  options = options.filter((key) => key.value !== "Fall 2024");
   return options.reverse();
 };
 

@@ -8,24 +8,25 @@ import Loading from '../Loading';
 import Download from '../Download';
 
 import { MyContext } from '../../MyProvider';
-
-import {
-  handleToggleCompletion,
-  handleStartStopTimer,
-  handleRunCode,
-  handleExit,
-  handleDownload,
-  handleOpenModal
-} from '../../utils/codeEditorUtils';
+import { useCodeHandlers } from '../../utils/code/useCodeHandlers';
 
 function Single({ problem, completed }) {
   const [isCompleted, setIsCompleted] = useState(completed);
   const [loading, setLoading] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(7200); // 2 hours in seconds
+  const [timeLeft, setTimeLeft] = useState(7200);
   const [isRunning, setIsRunning] = useState(false);
   const [output, setOutput] = useState("Run code to see output!"); 
-  const [editorContent, setEditorContent] = useState("");
+  const [editorContent, setEditorContent] = useState(`#include <stdio.h>\n\nint main() {\n    printf("Hello, World!\\n");\n    return 0;\n}`);
   const [downloadModal, setDownloadModal] = useState(false);
+
+  const {
+    handleToggleCompletion,
+    handleStartStopTimer,
+    handleRunCode,
+    handleExit,
+    handleDownload,
+    handleOpenModal,
+  } = useCodeHandlers();
 
   const { completedProblems, setCompletedProblems } = useContext(MyContext);
   
@@ -43,8 +44,8 @@ function Single({ problem, completed }) {
     }
   }, [isRunning, timeLeft]);
 
-  const onToggleCompletion = () => {
-    handleToggleCompletion({
+  const onToggleCompletion = async () => {
+    return await handleToggleCompletion({
       isCompleted,
       setIsCompleted,
       setLoading,
@@ -107,7 +108,7 @@ function Single({ problem, completed }) {
       <div className="grid grid-cols-2 gap-2 flex-grow h-5/6">
         <PdfViewer problem={problem} isRunning={isRunning} />
         <div className="flex flex-col gap-2">
-          <CodeEditor isRunning={isRunning} setEditorContent={setEditorContent} />
+          <CodeEditor isRunning={isRunning} editorContent={editorContent} setEditorContent={setEditorContent} />
           <CodeOutput output={output} />
         </div>
       </div>

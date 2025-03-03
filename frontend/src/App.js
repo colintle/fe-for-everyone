@@ -12,28 +12,31 @@ import Form from './components/form/Form';
 import Join from "./components/multi/Join"
 import { MyContext } from './MyProvider';
 
+import { useCodeApiCalls } from './utils/code/useCodeApiCalls';
+
 function App() {
   const isMobile = window.matchMedia("only screen and (max-width: 1024px), (max-height: 768px)").matches;
-  const [form, setForm] = useState(false)
-  const [join, setJoin] = useState(false)
-  const {setSingle, setMulti, logout, handleLogout, loading, accessToken} = useContext(MyContext)
-  const location = useLocation()
+  const [form, setForm] = useState(false);
+  const [join, setJoin] = useState(false);
+  const {setSingle, setMulti, logout, handleLogout, loading, accessToken, setCompletedProblems} = useContext(MyContext);
+  const { getCompletedProblems } = useCodeApiCalls();
+  const location = useLocation();
 
   useEffect(() => {
     const renderForm = () => {
       if (logout){
-        setForm(true)
+        setForm(true);
       }
       else{
-        setForm(false)
+        setForm(false);
       }
     }
-    renderForm()
+    renderForm();
   }, [logout, handleLogout])
 
   useEffect(() => {
     if (accessToken){
-      setForm(false)
+      setForm(false);
     }
   }, [accessToken])
 
@@ -43,8 +46,8 @@ function App() {
             window.location.reload();
         }
         else if (window.location.pathname === '/') {
-          setSingle(false)
-          setMulti(false)
+          setSingle(false);
+          setMulti(false);
         }
     };
 
@@ -53,7 +56,18 @@ function App() {
     return () => {
         window.removeEventListener('popstate', handlePopState);
     };
-}, [setSingle, setMulti]);
+  }, [setSingle, setMulti]);
+
+  useEffect(() => {
+      const fetchCompletedProblems = async () => {
+        const response = await getCompletedProblems();
+        if (response) {
+          setCompletedProblems(response.problems);
+        }
+      };
+  
+      fetchCompletedProblems();
+    }, [accessToken, getCompletedProblems, setCompletedProblems]);
 
   if(isMobile){
     return(
@@ -66,6 +80,7 @@ function App() {
       </Popup>
     )
   }
+
   return (
     <div>    
       <div className="flex flex-col h-screen">
@@ -81,4 +96,4 @@ function App() {
   )
 }
 
-export default App
+export default App;

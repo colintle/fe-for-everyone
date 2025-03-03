@@ -20,7 +20,6 @@ function Step1({ nextStep }) {
     }
   };
 
-  // Set the description based on the selected mode
   const description = selectedMode === 'Single'
     ? 'Single-Player Mode allows users to study independently, providing a focused environment for practicing coding problems and preparing for the Foundation Exam at UCF.'
     : selectedMode === 'Multi'

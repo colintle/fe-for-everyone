@@ -11,20 +11,14 @@ import Members from './Members';
 
 import { MyContext } from '../../MyProvider';
 
-import {
-  handleToggleCompletion,
-  handleRunCode,
-  handleExit,
-  handleDownload,
-  handleOpenModal,
-} from '../../utils/codeEditorUtils';
+import { useCodeHandlers } from '../../utils/code/useCodeHandlers';
 
 function Multi({ problem, completed, inviteCode }) {
   const [isCompleted, setIsCompleted] = useState(completed);
   const [loading, setLoading] = useState(false);
   const isRunning = true;
   const [output, setOutput] = useState("Run code to see output!");
-  const [editorContent, setEditorContent] = useState("");
+  const [editorContent, setEditorContent] = useState(`#include <stdio.h>\n\nint main() {\n    printf("Hello, World!\\n");\n    return 0;\n}`);
 
   const [downloadModal, setDownloadModal] = useState(false);
   const [inviteModal, setInviteModal] = useState(false);
@@ -33,8 +27,16 @@ function Multi({ problem, completed, inviteCode }) {
   const { completedProblems, setCompletedProblems } = useContext(MyContext);
   const navigate = useNavigate();
 
-  const onToggleCompletion = () => {
-    handleToggleCompletion({
+  const {
+    handleToggleCompletion,
+    handleRunCode,
+    handleExit,
+    handleDownload,
+    handleOpenModal, 
+  } = useCodeHandlers()
+
+  const onToggleCompletion = async () => {
+    return await handleToggleCompletion({
       isCompleted,
       setIsCompleted,
       setLoading,
@@ -99,7 +101,7 @@ function Multi({ problem, completed, inviteCode }) {
       <div className="grid grid-cols-2 gap-2 flex-grow h-5/6">
         <PdfViewer problem={problem} isRunning={isRunning} />
         <div className="flex flex-col gap-2">
-          <CodeEditor isRunning={isRunning} setEditorContent={setEditorContent} />
+          <CodeEditor isRunning={isRunning} editorContent={editorContent} setEditorContent={setEditorContent} />
           <CodeOutput output={output} />
         </div>
       </div>

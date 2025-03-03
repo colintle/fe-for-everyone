@@ -1,3 +1,5 @@
+import { GET, DELETE } from "./api/methods";
+
 export const parseToken = (token) => {
   if (!token) {
     return null;
@@ -36,7 +38,7 @@ export const getUsernameFromToken = (accessToken) => {
 
 export const refreshToken = async () => {
   const refreshResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/refresh`, {
-    method: 'GET',
+    method: GET,
     credentials: 'include',
   });
 
@@ -51,7 +53,7 @@ export const refreshToken = async () => {
 
 export const clearToken = async () => {
   const signoutResponse  = await fetch(`${process.env.REACT_APP_BACKEND_URL}/signout`, {
-    method: 'DELETE',
+    method: DELETE,
     credentials: 'include',
   });
 

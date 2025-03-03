@@ -3,7 +3,7 @@ import { HiMiniArrowSmallLeft, HiMiniArrowSmallRight } from "react-icons/hi2";
 import { MyContext } from '../../MyProvider';
 
 function History() {
-  const { completedProblems } = useContext(MyContext);
+  const { completedProblems} = useContext(MyContext);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -28,7 +28,7 @@ function History() {
 
   const handleExamClick = (examName) => {
     const pdfPath = `/solutions/${examName}.pdf`;
-    window.open(pdfPath, '_blank'); // Open PDF in a new tab
+    window.open(pdfPath, '_blank');
   };
 
   return (
