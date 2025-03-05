@@ -20,9 +20,19 @@ export const useRoomApiCalls = () => {
         return true;
     }
 
+    const createRoom = async (roomName, problemStatementPath) => {
+        const response = await callApi(`/room/create`, POST, { roomName, problemStatementPath });
+        if (response?.error) {
+          return false;
+        }
+        // {room (this is the id to invite others), roomName, problemStatementPath, admin (admin's username), adminID, message}
+        return response;
+    }
+
 
     return {
         isJoined,
-        leaveRoom
+        leaveRoom,
+        createRoom
     };
 };
