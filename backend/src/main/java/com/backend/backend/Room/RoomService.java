@@ -217,7 +217,8 @@ public class RoomService {
             userRepository.save(user);
 
             Map<String, Object> response = new HashMap<>();
-            response.put("room", room.getRoomID());
+            response.put("room", room.getRoomID().toString());
+            response.put("roomName", room.getRoomName());
             response.put("problemStatementPath", room.getProblemStatementPath());
             response.put("admin", room.getAdmin().getUsername());
             response.put("adminID", room.getAdmin().getId());
