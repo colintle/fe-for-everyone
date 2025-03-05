@@ -12,7 +12,17 @@ export const useRoomApiCalls = () => {
         return true;
     }
 
+    const leaveRoom = async () => {
+        const response = await callApi(`/room/leave`, POST);
+        if (response?.error) {
+          return false;
+        }
+        return true;
+    }
+
+
     return {
-        isJoined
+        isJoined,
+        leaveRoom
     };
 };
