@@ -13,7 +13,7 @@ export const useRoomApiCalls = () => {
     }
 
     const leaveRoom = async () => {
-        const response = await callApi(`/room/leave`, POST);
+        const response = await callApi(`/room/leave`, GET);
         if (response?.error) {
           return false;
         }
