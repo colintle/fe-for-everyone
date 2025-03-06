@@ -9,7 +9,8 @@ export const useRoomApiCalls = () => {
         if (response?.error) {
           return false;
         }
-        return true;
+        // {room (this is the id to invite others), role, problemStatementPath, admin (admin's username), adminID, roomName}
+        return response;
     }
 
     const leaveRoom = async () => {
