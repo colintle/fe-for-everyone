@@ -14,15 +14,17 @@ function Home() {
     exam: '',
     roomName: ''
   });
-  const {setSingle, setMulti} = useContext(MyContext);
+  const {setSingle, setMulti, setRoomData} = useContext(MyContext);
   const navigate = useNavigate();
 
   const nextStep = () => setCurrentStep(currentStep + 1);
   const prevStep = () => setCurrentStep(currentStep - 1);
 
-  useEffect(() => { 
-    setSingle(false);
-    setMulti(false)}
+  useEffect(() => {
+    setSingle(false)
+    setMulti(false)
+    setRoomData({})
+  }
     , [setSingle, setMulti]
   )
 
@@ -43,14 +45,15 @@ function Home() {
     nextStep();
   };
 
-  const handleSubmit = () => {
-    // Here you would normally submit the data to an API or handle it as needed.
+  const handleSubmit = async () => {
     if (formData.mode === "Single"){
       setSingle(formData)
       navigate("/code")
     }
 
     if (formData.mode === "Multi"){
+      // make api call to check if user is joined and then join room
+      // setRoomData
       setMulti(formData)
       navigate("/code")
     }
