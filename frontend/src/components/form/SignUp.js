@@ -8,7 +8,7 @@ import { POST } from '../../utils/api/methods';
 function SignUp() {
   const [showPassword, setPassword] = useState(false);
   const [errors, setErrors] = useState({});
-  const { setUsername, setAccessToken, setLoading } = useContext(MyContext);
+  const { setUsername, setAccessToken, setLoading, setLogout } = useContext(MyContext);
   const { callApi } = useApi();
 
   const handleSubmit = async (event) => {
@@ -59,6 +59,7 @@ function SignUp() {
         setErrors(serverErrors);
       } else {
         const { token, username } = data;
+        setLogout(false);
         setAccessToken(token);
         setUsername(username);
       }
