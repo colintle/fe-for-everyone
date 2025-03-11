@@ -55,7 +55,7 @@ function MyProvider({children}) {
 
     return (
         <MyContext.Provider 
-            value={{single, setSingle, multi, setMulti, accessToken, setAccessToken, completedProblems, setCompletedProblems, logout, loading, setLoading, handleLogout, username, setUsername, roomData, setRoomData}}>
+            value={{single, setSingle, multi, setMulti, accessToken, setAccessToken, completedProblems, setCompletedProblems, logout, setLogout, loading, setLoading, handleLogout, username, setUsername, roomData, setRoomData}}>
             {children}
         </MyContext.Provider>
     )
