@@ -62,7 +62,7 @@ const LeaveMenu = ({roomData, redirectToCode, handleLeave, message}) => {
 
 function Join({ setJoin }) {
   const { joinRoom, leaveRoom, isJoined } = useRoomApiCalls();
-  const { setMulti, setRoomData } = useContext(MyContext);
+  const { setMulti, setRoomData, setLoading } = useContext(MyContext);
   const [roomId, setRoomId] = useState('');
   const [message, setMessage] = useState('');
   const [joined, setJoined] = useState(null);
@@ -76,7 +76,7 @@ function Join({ setJoin }) {
       }
     }
     checkJoined();
-  }, [isJoined, setJoin])
+  }, [isJoined, setJoin, setLoading])
 
   const redirectToCode = (roomName, problemStatementPath, roomData) => {
     setMulti({ mode: 'Multi', roomName, exam: problemStatementPath });
@@ -85,6 +85,7 @@ function Join({ setJoin }) {
   }
 
   const handleJoin = async () => {
+    setLoading(true)
     if (roomId === '') {
       setMessage('Please enter a room')
       return;
@@ -98,9 +99,11 @@ function Join({ setJoin }) {
     }
 
     redirectToCode(response.roomName, response.problemStatementPath, response);
+    setLoading(false)
   };
 
   const handleLeave = async () => {
+    setLoading(true)
     const response = await leaveRoom();
     if (response.error) {
       setMessage('Error leaving the room. Please try again.');
@@ -110,6 +113,7 @@ function Join({ setJoin }) {
 
     setJoined(false);
     setMessage('You have left the room.');
+    setLoading(false)
   }
 
   return (
