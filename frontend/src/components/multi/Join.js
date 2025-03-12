@@ -79,6 +79,7 @@ function Join({ setJoin }) {
   }, [isJoined, setJoin, setLoading])
 
   const redirectToCode = (roomName, problemStatementPath, roomData) => {
+    setJoin(false);
     setMulti({ mode: 'Multi', roomName, exam: problemStatementPath });
     setRoomData(roomData);
     navigate("/code");
