@@ -27,7 +27,7 @@ const JoinMenu = ({roomId, setRoomId, handleJoin, message}) => {
             Join
           </button>
         </>
-      <p className="mt-4 text-sm text-gray-500">
+      <p className="mt-4 text-sm text-red-500">
         {message}
       </p>
     </div>
@@ -53,7 +53,7 @@ const LeaveMenu = ({roomData, redirectToCode, handleLeave, message}) => {
       >
         Go to Room
       </button>
-      <p className="mt-4 text-sm text-gray-500">
+      <p className="mt-4 text-sm text-red-500">
         {message}
       </p>
     </div>
@@ -76,7 +76,7 @@ function Join({ setJoin }) {
       }
     }
     checkJoined();
-  }, [isJoined, setJoin, setLoading])
+  }, [isJoined])
 
   const redirectToCode = (roomName, problemStatementPath, roomData) => {
     setJoin(false);
@@ -113,7 +113,6 @@ function Join({ setJoin }) {
     }
 
     setJoined(false);
-    setMessage('You have left the room.');
     setLoading(false)
   }
 
