@@ -7,8 +7,11 @@ import Step3 from './Step3';
 import ProgressBar from './ProgressBar';
 import { MyContext } from '../../MyProvider';
 
+import { useRoomApiCalls } from '../../utils/room/useRoomApiCalls';
+
 function Home() {
   const [currentStep, setCurrentStep] = useState(1);
+  const [message, setMessage] = useState('');
   const [formData, setFormData] = useState({
     mode: '',
     exam: '',
@@ -20,13 +23,23 @@ function Home() {
   const nextStep = () => setCurrentStep(currentStep + 1);
   const prevStep = () => setCurrentStep(currentStep - 1);
 
+  const { isJoined, createRoom } = useRoomApiCalls();
+
   useEffect(() => {
     setSingle(false)
     setMulti(false)
     setRoomData({})
-  }
-    , [setSingle, setMulti]
-  )
+  }, [setSingle, setMulti, setRoomData])
+
+  useEffect(() => {
+    const checkJoined = async () => {    
+      const response = await isJoined();  
+      if (response?.room) {
+        setMessage("Please leave the current room to join another room. Click the 'Join Room' button at top right corner.")
+      }
+    }
+    checkJoined();
+  }, [isJoined])
 
   const handleModeSelection = (data) => {
     setFormData((prevData) => ({
@@ -57,7 +70,6 @@ function Home() {
       setMulti(formData)
       navigate("/code")
     }
-
   };
 
   return (
@@ -69,15 +81,19 @@ function Home() {
         </div>
 
         {/* Step Content */}
-        <div className="w-full">
-          {currentStep === 1 && <Step1 nextStep={handleModeSelection} />}
-          {currentStep === 2 && (
-            <Step2 nextStep={handleExamSelection} prevStep={prevStep} />
-          )}
-          {currentStep === 3 && (
-            <Step3 data={formData} prevStep={prevStep} submit={handleSubmit} />
-          )}
-        </div>
+
+        {message ? 
+          <p className="text-red-500 text-sm mb-4">{message}</p> : 
+          <div className="w-full">
+            {currentStep === 1 && <Step1 nextStep={handleModeSelection} />}
+            {currentStep === 2 && (
+              <Step2 nextStep={handleExamSelection} prevStep={prevStep} />
+            )}
+            {currentStep === 3 && (
+              <Step3 data={formData} prevStep={prevStep} submit={handleSubmit} />
+            )}
+          </div>
+        }
       </div>
     </div>
   );
