@@ -43,7 +43,11 @@ func subscribeToQueue(conn *amqp091.Connection, queueName string) {
 	if err != nil {
 		log.Fatalf("Could not create channel: %v", err)
 	}
-	defer channel.Close()
+
+	_, err = channel.QueuePurge(queueName, false)
+	if err != nil {
+		log.Fatalf("Could not purge queue %s: %v", queueName, err)
+	}
 
 	err = channel.Qos(1, 0, false)
 	if err != nil {

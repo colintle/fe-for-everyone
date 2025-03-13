@@ -37,7 +37,7 @@ func InitializeRedis() *redis.Client{
 	if err != nil {
 		log.Fatalf("Could not connect to Redis: %v", err)
 	}
-	fmt.Println("Connected to Redis")
+	fmt.Println("Connected to Redis") 
 	return rdb
 }
 

@@ -65,8 +65,10 @@ function App() {
           setCompletedProblems(response.problems);
         }
       };
-  
-      fetchCompletedProblems();
+
+      if (accessToken){
+        fetchCompletedProblems(); 
+      }
     }, [accessToken, getCompletedProblems, setCompletedProblems]);
 
   if(isMobile){

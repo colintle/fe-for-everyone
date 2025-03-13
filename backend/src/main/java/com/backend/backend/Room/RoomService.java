@@ -51,6 +51,7 @@ public class RoomService {
 
         response.put("room", user.getRoom() == null ? null : user.getRoom().getRoomID());
         response.put("role", user.getRole());
+        response.put("roomName", user.getRoom() == null ? null : user.getRoom().getRoomName());
         response.put("adminID", user.getRoom() == null ? null : user.getRoom().getAdmin().getId());
         response.put("admin", user.getRoom() == null ? null : user.getRoom().getAdmin().getUsername());
         response.put("problemStatementPath", user.getRoom() == null ? null : user.getRoom().getProblemStatementPath());
@@ -217,7 +218,8 @@ public class RoomService {
             userRepository.save(user);
 
             Map<String, Object> response = new HashMap<>();
-            response.put("room", room.getRoomID());
+            response.put("room", room.getRoomID().toString());
+            response.put("roomName", room.getRoomName());
             response.put("problemStatementPath", room.getProblemStatementPath());
             response.put("admin", room.getAdmin().getUsername());
             response.put("adminID", room.getAdmin().getId());

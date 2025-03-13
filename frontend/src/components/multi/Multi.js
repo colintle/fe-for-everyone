@@ -12,6 +12,7 @@ import Members from './Members';
 import { MyContext } from '../../MyProvider';
 
 import { useCodeHandlers } from '../../utils/code/useCodeHandlers';
+import { useRoomApiCalls } from '../../utils/room/useRoomApiCalls';
 
 function Multi({ problem, completed, inviteCode }) {
   const [isCompleted, setIsCompleted] = useState(completed);
@@ -35,6 +36,10 @@ function Multi({ problem, completed, inviteCode }) {
     handleOpenModal, 
   } = useCodeHandlers()
 
+  const {
+    leaveRoom
+  } = useRoomApiCalls();
+
   const onToggleCompletion = async () => {
     return await handleToggleCompletion({
       isCompleted,
@@ -54,7 +59,14 @@ function Multi({ problem, completed, inviteCode }) {
     });
   };
 
-  const onExit = () => {
+  const onExit = async () => {
+    setLoading(true)
+    const response = await leaveRoom();
+    if (response.error) {
+      setOutput('Error leaving the room. Please try again.');
+      return;
+    }
+
     handleExit({
       setLoading,
       navigate,
