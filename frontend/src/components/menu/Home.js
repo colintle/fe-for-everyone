@@ -17,7 +17,7 @@ function Home() {
     exam: '',
     roomName: ''
   });
-  const {setSingle, setMulti, setRoomData} = useContext(MyContext);
+  const {setSingle, setMulti, setRoomData, setLoading} = useContext(MyContext);
   const navigate = useNavigate();
 
   const nextStep = () => setCurrentStep(currentStep + 1);
@@ -65,9 +65,17 @@ function Home() {
     }
 
     if (formData.mode === "Multi"){
-      // make api call to check if user is joined and then join room
-      // setRoomData
+      setLoading(true)
+      const response = await createRoom(formData.roomName, formData.exam);
+      if (response.error) {
+        setMessage('Error creating the room. Please try again.');
+        setLoading(false)
+        return;
+      }
+
+      setRoomData(response)
       setMulti(formData)
+      setLoading(false)
       navigate("/code")
     }
   };
