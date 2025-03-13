@@ -17,7 +17,7 @@ function Home() {
     exam: '',
     roomName: ''
   });
-  const {setSingle, setMulti, setRoomData, setLoading} = useContext(MyContext);
+  const {accessToken, setSingle, setMulti, setRoomData, setLoading} = useContext(MyContext);
   const navigate = useNavigate();
 
   const nextStep = () => setCurrentStep(currentStep + 1);
@@ -38,8 +38,10 @@ function Home() {
         setMessage("Please leave the current room to join another room. Click the 'Join Room' button at top right corner.")
       }
     }
-    checkJoined();
-  }, [isJoined])
+    if (accessToken){
+      checkJoined();
+    }
+  }, [accessToken, isJoined])
 
   const handleModeSelection = (data) => {
     setFormData((prevData) => ({
