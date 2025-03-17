@@ -7,24 +7,41 @@ import Step3 from './Step3';
 import ProgressBar from './ProgressBar';
 import { MyContext } from '../../MyProvider';
 
+import { useRoomApiCalls } from '../../utils/room/useRoomApiCalls';
+
 function Home() {
   const [currentStep, setCurrentStep] = useState(1);
+  const [message, setMessage] = useState('');
   const [formData, setFormData] = useState({
     mode: '',
     exam: '',
     roomName: ''
   });
-  const {setSingle, setMulti} = useContext(MyContext);
+  const {accessToken, setSingle, setMulti, setRoomData, setLoading} = useContext(MyContext);
   const navigate = useNavigate();
 
   const nextStep = () => setCurrentStep(currentStep + 1);
   const prevStep = () => setCurrentStep(currentStep - 1);
 
-  useEffect(() => { 
-    setSingle(false);
-    setMulti(false)}
-    , [setSingle, setMulti]
-  )
+  const { isJoined, createRoom } = useRoomApiCalls();
+
+  useEffect(() => {
+    setSingle(false)
+    setMulti(false)
+    setRoomData({})
+  }, [setSingle, setMulti, setRoomData])
+
+  useEffect(() => {
+    const checkJoined = async () => {    
+      const response = await isJoined();  
+      if (response?.room) {
+        setMessage("Please leave the current room to join another room. Click the 'Join Room' button at top right corner.")
+      }
+    }
+    if (accessToken){
+      checkJoined();
+    }
+  }, [accessToken, isJoined])
 
   const handleModeSelection = (data) => {
     setFormData((prevData) => ({
@@ -43,18 +60,26 @@ function Home() {
     nextStep();
   };
 
-  const handleSubmit = () => {
-    // Here you would normally submit the data to an API or handle it as needed.
+  const handleSubmit = async () => {
     if (formData.mode === "Single"){
       setSingle(formData)
       navigate("/code")
     }
 
     if (formData.mode === "Multi"){
+      setLoading(true)
+      const response = await createRoom(formData.roomName, formData.exam);
+      if (response.error) {
+        setMessage('Error creating the room. Please try again.');
+        setLoading(false)
+        return;
+      }
+
+      setRoomData(response)
       setMulti(formData)
+      setLoading(false)
       navigate("/code")
     }
-
   };
 
   return (
@@ -66,15 +91,19 @@ function Home() {
         </div>
 
         {/* Step Content */}
-        <div className="w-full">
-          {currentStep === 1 && <Step1 nextStep={handleModeSelection} />}
-          {currentStep === 2 && (
-            <Step2 nextStep={handleExamSelection} prevStep={prevStep} />
-          )}
-          {currentStep === 3 && (
-            <Step3 data={formData} prevStep={prevStep} submit={handleSubmit} />
-          )}
-        </div>
+
+        {message ? 
+          <p className="text-red-500 text-sm mb-4">{message}</p> : 
+          <div className="w-full">
+            {currentStep === 1 && <Step1 nextStep={handleModeSelection} />}
+            {currentStep === 2 && (
+              <Step2 nextStep={handleExamSelection} prevStep={prevStep} />
+            )}
+            {currentStep === 3 && (
+              <Step3 data={formData} prevStep={prevStep} submit={handleSubmit} />
+            )}
+          </div>
+        }
       </div>
     </div>
   );

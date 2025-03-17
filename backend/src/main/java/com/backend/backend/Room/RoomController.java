@@ -23,7 +23,6 @@ public class RoomController {
         this.roomService = roomService;
     }
 
-    // tested
     @PostMapping("/create")
     public ResponseEntity<Object> createRoom(@RequestBody Room room, Authentication authentication) {
         if (roomService.ifJoinedRoom(authentication)){

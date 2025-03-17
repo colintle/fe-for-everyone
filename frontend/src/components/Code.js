@@ -7,7 +7,7 @@ import Single from './single/Single';
 import Loading from './Loading';
 
 function Code() {
-    const { single, multi, completedProblems } = useContext(MyContext);
+    const { single, multi, roomData, completedProblems } = useContext(MyContext);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
@@ -36,8 +36,8 @@ function Code() {
         return <Single problem={single.exam} completed={completed} />;
     } else if (multi) {
         const completed = isCompleted(multi.exam);
-        // will need to fetch the room data from api
-        return <Multi problem={multi.exam} completed={completed} inviteCode={"example"} />;
+        // will need to connect to websocket here
+        return <Multi problem={multi.exam} completed={completed} inviteCode={roomData?.room} />;
     } else {
         return null; // Or any other fallback UI
     }

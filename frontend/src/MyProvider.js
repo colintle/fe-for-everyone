@@ -8,6 +8,9 @@ function MyProvider({children}) {
     const [loading, setLoading] = useState(true)
     const [single, setSingle] = useState(false)
     const [multi, setMulti] = useState(false)
+    // {mode, exam, roomName}
+    const [roomData, setRoomData] = useState({})
+    // {roomName, problemStatementPath, admin, adminID, room (room id)}
     const [username, setUsername] = useState("")
     const [completedProblems, setCompletedProblems] = useState([])
     const [accessToken, setAccessToken] = useState("")
@@ -52,7 +55,7 @@ function MyProvider({children}) {
 
     return (
         <MyContext.Provider 
-            value={{single, setSingle, multi, setMulti, accessToken, setAccessToken, completedProblems, setCompletedProblems, logout, setLogout, loading, setLoading, handleLogout, username, setUsername}}>
+            value={{single, setSingle, multi, setMulti, accessToken, setAccessToken, completedProblems, setCompletedProblems, logout, setLogout, loading, setLoading, handleLogout, username, setUsername, roomData, setRoomData}}>
             {children}
         </MyContext.Provider>
     )

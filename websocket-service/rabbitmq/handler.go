@@ -10,10 +10,12 @@ import (
 	"websocket-service/redis"
 )
 
-var rdb = redis.GetRedisClient()
-var ctx = redis.GetRedisContext()
-
 func handleCreateRoom(data map[string]string) {
+    var rdb = redis.GetRedisClient()
+    var ctx = redis.GetRedisContext()
+
+    fmt.Println("User created room with data:", data)
+
 	admin := models.User{
 		UserID:   data["adminID"],
 		Username: data["admin"],
@@ -28,7 +30,11 @@ func handleCreateRoom(data map[string]string) {
 		Code:             "",
 	}
 
+    if rdb == nil {
+        log.Fatal("Redis client is nil. Check redis.GetRedisClient() initialization")
+    }    
 	exists, err := rdb.Exists(ctx, "room:"+room.RoomID).Result()
+    
 	if err != nil {
 		log.Fatalf("Failed to check if room exists: %v", err)
 	}
@@ -59,6 +65,11 @@ func handleCreateRoom(data map[string]string) {
 }
 
 func handleDeleteRoom(data map[string]string) {
+    var rdb = redis.GetRedisClient()
+    var ctx = redis.GetRedisContext()
+
+    fmt.Println("User deleted room with data:", data)
+
     roomID := data["room"]
 
     _, err := rdb.Del(ctx, "roomUsers:" + roomID).Result()
@@ -83,6 +94,9 @@ func handleDeleteRoom(data map[string]string) {
 }
 
 func handleUserJoined(data map[string]string) {
+    var rdb = redis.GetRedisClient()
+    var ctx = redis.GetRedisContext()
+
     fmt.Println("User joined with data:", data)
 
     userID := data["userID"]
@@ -136,6 +150,9 @@ func handleUserJoined(data map[string]string) {
 }
 
 func handleUserLeft(data map[string]string) {
+    var rdb = redis.GetRedisClient()
+    var ctx = redis.GetRedisContext()
+
     fmt.Println("User left with data:", data)
 
     userID := data["userID"]
@@ -169,6 +186,9 @@ func handleUserLeft(data map[string]string) {
 }
 
 func handleChangeAdmin(data map[string]string) {
+    var rdb = redis.GetRedisClient()
+    var ctx = redis.GetRedisContext()
+
     fmt.Println("Admin changed with data:", data)
 
     roomID := data["room"]
@@ -216,6 +236,9 @@ func handleChangeAdmin(data map[string]string) {
 }
 
 func handleChangeProblem(data map[string]string) {
+    var rdb = redis.GetRedisClient()
+    var ctx = redis.GetRedisContext()
+    
     fmt.Println("Problem statement changed with data:", data)
 
     roomID := data["room"]
