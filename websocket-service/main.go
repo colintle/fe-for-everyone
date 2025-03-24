@@ -22,7 +22,7 @@ func main() {
 
 	go rabbitmq.SubscribeToQueues(conn)
 
-	http.HandleFunc("/ws", redis.RoomHandler)
+	http.HandleFunc("/ws/", redis.RoomHandler)
 	log.Println("WebSocket service starting on :8081...")
 
 	if err := http.ListenAndServe(":8081", nil); err != nil {
