@@ -19,6 +19,16 @@ var roomConnections = instance.GetRoomConnections()
 var upgrader = instance.GetUpgrader()
 
 func RoomHandler(w http.ResponseWriter, r *http.Request) {
+
+    w.Header().Set("Access-Control-Allow-Origin", os.Getenv("FRONTEND_URL"))
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+    if r.Method == http.MethodOptions {
+        w.WriteHeader(http.StatusOK)
+        return
+    }    
+
 	roomID := r.URL.Query().Get("roomID")
 	tokenStr := r.URL.Query().Get("token")
 
