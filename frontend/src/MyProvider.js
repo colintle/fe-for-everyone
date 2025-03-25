@@ -52,7 +52,7 @@ function MyProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    if (multi && roomData && roomData.room && accessToken) {
+    if (multi && roomData && roomData?.room && accessToken) {
       if (!socket) {
         const wsUrl = `${process.env.REACT_APP_WEBSOCKET_URL}/ws/?roomID=${roomData.room}&token=${accessToken}`;
         const newSocket = new WebSocket(wsUrl);
@@ -67,6 +67,7 @@ function MyProvider({ children }) {
 
         newSocket.onclose = (event) => {
           setSocket(null);
+          setRoomData({});
           console.log("WebSocket disconnected:", event);
         };
 
