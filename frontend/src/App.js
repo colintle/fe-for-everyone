@@ -10,6 +10,7 @@ import Popup from './components/Popup';
 import Loading from "./components/Loading"
 import Form from './components/form/Form';
 import Join from "./components/multi/Join"
+import Alert from "./components/Alert"
 import { MyContext } from './MyProvider';
 
 import { useCodeApiCalls } from './utils/code/useCodeApiCalls';
@@ -18,7 +19,7 @@ function App() {
   const isMobile = window.matchMedia("only screen and (max-width: 1024px), (max-height: 768px)").matches;
   const [form, setForm] = useState(false);
   const [join, setJoin] = useState(false);
-  const {setSingle, setMulti, logout, handleLogout, loading, accessToken, setCompletedProblems} = useContext(MyContext);
+  const { message, setSingle, setMulti, logout, handleLogout, loading, accessToken, setCompletedProblems} = useContext(MyContext);
   const { getCompletedProblems } = useCodeApiCalls();
   const location = useLocation();
 
@@ -84,7 +85,8 @@ function App() {
   }
 
   return (
-    <div>    
+    <div>
+      {message && <Alert />}
       <div className="flex flex-col h-screen">
         {location.pathname !== "/code" && <Navbar setJoin={setJoin}/>}
         <div className="flex-grow">
