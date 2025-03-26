@@ -16,7 +16,7 @@ function Home() {
     exam: '',
     roomName: ''
   });
-  const { accessToken, setSingle, setMulti, setRoomData, setLoading, socket } = useContext(MyContext);
+  const { accessToken, setSingle, setMulti, setRoomData, setLoading } = useContext(MyContext);
   const navigate = useNavigate();
 
   const nextStep = () => setCurrentStep(currentStep + 1);
@@ -77,15 +77,16 @@ function Home() {
       setRoomData(response);
       setMulti(formData);
       setLoading(false);
+      navigate("/code");
     }
   };
 
-  useEffect(() => {
-    if (formData.mode === "Multi" && socket) {
-      setLoading(false)
-      navigate("/code");
-    }
-  }, [socket, formData.mode, navigate, setLoading]);
+  // useEffect(() => {
+  //   if (formData.mode === "Multi" && socket) {
+  //     setLoading(false)
+  //     navigate("/code");
+  //   }
+  // }, [socket, formData.mode, navigate, setLoading]);
 
   return (
     <div className="flex flex-col items-center pt-48 h-full">
