@@ -6,15 +6,28 @@ import Multi from './multi/Multi';
 import Single from './single/Single';
 import Loading from './Loading';
 
+import { useRoomApiCalls } from '../utils/room/useRoomApiCalls';
+
 function Code() {
-    const { single, multi, roomData, completedProblems } = useContext(MyContext);
+    const {
+        setMessage,
+        socket,
+        setSocket,
+        accessToken,
+        single,
+        multi,
+        roomData,
+        setRoomData,
+        completedProblems,
+    } = useContext(MyContext);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
+    const {leaveRoom} = useRoomApiCalls();
 
     useEffect(() => {
         const timer = setTimeout(() => {
             setLoading(false);
-        }, 2000);
+        }, 5000);
 
         return () => clearTimeout(timer); 
     }, []);
@@ -25,6 +38,53 @@ function Code() {
         }
     }, [single, multi, loading, navigate]);
 
+    useEffect(() => {
+        const resetRoom = () => {
+          setSocket(null);
+          setRoomData({});
+        };
+    
+        if (multi && roomData?.room && accessToken) {
+          if (!socket) {
+            const wsUrl = `${process.env.REACT_APP_WEBSOCKET_URL}/ws/?roomID=${roomData.room}&token=${accessToken}`;
+            const newSocket = new WebSocket(wsUrl);
+    
+            newSocket.onopen = () => {
+                setSocket(newSocket);
+                setLoading(false);
+                console.log("WebSocket connected");
+            };
+    
+            newSocket.onerror = (error) => {
+                console.error("WebSocket error:", error);
+            };
+    
+            newSocket.onmessage = (event) => {
+              console.log("Received WebSocket message:", event.data);
+            };
+    
+            newSocket.onclose = (event) => {
+              setLoading(true);
+              resetRoom();
+              console.log("WebSocket disconnected:", event);
+            };
+          }
+        } else if (socket) {
+          setLoading(true);
+          socket.close();
+          resetRoom();
+          navigate("/");
+        }
+      }, [multi, roomData, accessToken, socket, navigate, setMessage, setSocket, setRoomData, leaveRoom]);
+    
+      useEffect(() => {
+        return () => {
+          if (socket) {
+            socket.close();
+          }
+        };
+      }, [socket]);
+
     const isCompleted = (examName) => {
         return completedProblems.some(problem => problem.problemStatementPath === examName);
     };
@@ -34,12 +94,11 @@ function Code() {
     } else if (single) {
         const completed = isCompleted(single.exam);
         return <Single problem={single.exam} completed={completed} />;
-    } else if (multi) {
+    } else if (multi && socket) {
         const completed = isCompleted(multi.exam);
-        // will need to connect to websocket here
         return <Multi problem={multi.exam} completed={completed} inviteCode={roomData?.room} />;
     } else {
-        return null; // Or any other fallback UI
+        return null;
     }
 }
 
