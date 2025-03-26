@@ -34,7 +34,7 @@ const JoinMenu = ({roomId, setRoomId, handleJoin, message}) => {
   )
 }
 
-const LeaveMenu = ({roomData, redirectToCode, handleLeave, message}) => {
+const LeaveMenu = ({handleLeave, message}) => {
   return (
     <div className="flex flex-col items-center">
       <h2 className="text-xl font-bold mb-4">
@@ -46,12 +46,6 @@ const LeaveMenu = ({roomData, redirectToCode, handleLeave, message}) => {
         className="w-4/5 h-10 mt-4 bg-red-500 text-white rounded-md hover:bg-red-600 transition duration-150"
       >
         Leave
-      </button>
-      <button 
-        onClick={() => redirectToCode(roomData.roomName, roomData.problemStatementPath, roomData)}
-        className="w-4/5 h-10 mt-4 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-150"
-      >
-        Go to Room
       </button>
       <p className="mt-4 text-sm text-red-500">
         {message}
@@ -127,7 +121,7 @@ function Join({ setJoin }) {
         </button>
         
         {joined ? 
-        <LeaveMenu roomData={joined} redirectToCode={redirectToCode} handleLeave={handleLeave} message={message}/> 
+        <LeaveMenu handleLeave={handleLeave} message={message}/> 
         : <JoinMenu roomId={roomId} setRoomId={setRoomId} handleJoin={handleJoin} message={message} />
         }
       </div>
