@@ -4,6 +4,7 @@ import { refreshToken, getUsernameFromToken, clearToken } from './utils/token';
 const MyContext = createContext();
 
 function MyProvider({ children }) {
+  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [single, setSingle] = useState(false);
   const [multi, setMulti] = useState(false);
@@ -51,39 +52,11 @@ function MyProvider({ children }) {
     // eslint-disable-next-line
   }, []);
 
-  useEffect(() => {
-    if (multi && roomData && roomData?.room && accessToken) {
-      if (!socket) {
-        const wsUrl = `${process.env.REACT_APP_WEBSOCKET_URL}/ws/?roomID=${roomData.room}&token=${accessToken}`;
-        const newSocket = new WebSocket(wsUrl);
-
-        newSocket.onopen = () => {
-          console.log("WebSocket connected");
-        };
-
-        newSocket.onmessage = (event) => {
-          console.log("Received WebSocket message:", event.data);
-        };
-
-        newSocket.onclose = (event) => {
-          setSocket(null);
-          setRoomData({});
-          console.log("WebSocket disconnected:", event);
-        };
-
-        setSocket(newSocket);
-      }
-    } else {
-      if (socket) {
-        socket.close();
-        setSocket(null);
-      }
-    }
-  }, [multi, roomData, accessToken, socket]);
-
   return (
     <MyContext.Provider
       value={{
+        message,
+        setMessage,
         single,
         setSingle,
         multi,
