@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ControlPanel from '../editor/ControlPanel';
 import PdfViewer from "../editor/PdfViewer";
@@ -14,7 +14,7 @@ import { MyContext } from '../../MyProvider';
 import { useCodeHandlers } from '../../utils/code/useCodeHandlers';
 import { useRoomApiCalls } from '../../utils/room/useRoomApiCalls';
 
-function Multi({ problem, completed, inviteCode }) {
+function Multi({ problem, completed, inviteCode, socket }) {
   const [isCompleted, setIsCompleted] = useState(completed);
   const [loading, setLoading] = useState(false);
   const isRunning = true;
@@ -39,6 +39,20 @@ function Multi({ problem, completed, inviteCode }) {
   const {
     leaveRoom
   } = useRoomApiCalls();
+
+  useEffect(() => {
+    if (!socket) return;
+
+      const handleMessage = (event) => {
+          console.log("Received WebSocket message in Multi:", event.data);
+      };
+
+      socket.addEventListener('message', handleMessage);
+
+      return () => {
+          socket.removeEventListener('message', handleMessage);
+      };
+  }, [socket])
 
   const onToggleCompletion = async () => {
     return await handleToggleCompletion({
@@ -86,8 +100,6 @@ function Multi({ problem, completed, inviteCode }) {
   const onOpenInviteModal = () => handleOpenModal(setInviteModal);
   const onOpenMembersModal = () => handleOpenModal(setMembersModal);
 
-
-  // Will need to filter socket messages for intial metadata, user_joined, and user_left,
   const members = [
     {userID: 1, username: "Alice"}, {userID: 2, username: "Bob"}, {userID: 3, username: "Charlie"}, {userID: 4, username: "David"}, {userID: 5, username: "Eve"}, {userID: 6, username: "Frank"}
   ]
