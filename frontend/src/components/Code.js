@@ -59,10 +59,6 @@ function Code() {
                 console.error("WebSocket error:", error);
             };
     
-            newSocket.onmessage = (event) => {
-              console.log("Received WebSocket message:", event.data);
-            };
-    
             newSocket.onclose = (event) => {
               setLoading(true);
               resetRoom();
@@ -96,7 +92,7 @@ function Code() {
         return <Single problem={single.exam} completed={completed} />;
     } else if (multi && socket) {
         const completed = isCompleted(multi.exam);
-        return <Multi problem={multi.exam} completed={completed} inviteCode={roomData?.room} />;
+        return <Multi socket={socket} problem={multi.exam} completed={completed} inviteCode={roomData?.room} />;
     } else {
         return null;
     }
